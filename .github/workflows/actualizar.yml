@@ -1,0 +1,33 @@
+name: Actualizar Dashboard
+
+on:
+  push:
+    paths:
+      - 'data/*.xlsx'
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Instalar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependencias
+        run: pip install openpyxl
+
+      - name: Ejecutar script de actualización
+        run: python actualizar_dashboard.py
+
+      - name: Publicar dashboards actualizados
+        run: |
+          git config user.name "Dashboard Bot"
+          git config user.email "dashboard@cma-paraguay.com"
+          git add Dashboard_*.html historial_deuda.json
+          git diff --staged --quiet || git commit -m "Dashboard actualizado $(date +'%d/%m/%Y %H:%M')"
+          git push
