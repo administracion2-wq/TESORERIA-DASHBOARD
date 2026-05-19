@@ -1,0 +1,621 @@
+﻿<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Cuentas por Cobrar — CMA Paraguay S.A.</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:#F5F0EA;color:#3D2A18;min-height:100vh}
+a{text-decoration:none;transition:all .15s}
+.card{background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid #E5DDD0;padding:18px 20px}
+.filters{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end}
+.fg label{font-size:10px;font-weight:500;color:#A09080;text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:7px}
+.btn-group{display:flex;flex-wrap:wrap;gap:5px}
+.tag{border:none;border-radius:8px;padding:5px 13px;font-size:11.5px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit;background:#F5F0EA;color:#5A4A38}
+.tag:hover:not(.active){background:#EAE0D0}
+.tag.active{color:#fff}
+select{font-family:inherit;font-size:12px;border:1.5px solid #D5C8B5;border-radius:8px;padding:6px 12px;background:#fff;color:#3D3020;cursor:pointer;outline:none;min-width:130px}
+select:focus{border-color:#5C4528}
+.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.kpi{border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid #E5DDD0;padding:14px 16px;background:#fff}
+.kpi-label{font-size:10px;font-weight:500;color:#A09080;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;display:flex;justify-content:space-between}
+.kpi-value{font-size:19px;font-weight:600;line-height:1.2}
+.kpi-sub{font-size:11px;color:#A09080;margin-top:3px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.section-title{font-size:12.5px;font-weight:600;color:#3D3020;margin-bottom:13px}
+.container{max-width:1300px;margin:0 auto;padding:20px 26px;display:flex;flex-direction:column;gap:15px}
+/* RATING BADGES */
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:10.5px;font-weight:700;white-space:nowrap}
+.b-cobrado{background:#E8EDD8;color:#4A5230}
+.b-avencer{background:#E5DDD0;color:#5C4528}
+.b-bajo{background:#fef9c3;color:#92400e}
+.b-medio{background:#fde68a;color:#92400e}
+.b-alto{background:#fee2e2;color:#b91c1c}
+.b-critico{background:#7f1d1d;color:#fff}
+/* CLIENT TABLE */
+.cli-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:4px}
+.cli-table th{position:sticky;top:0;background:#F5F0EA;text-align:left;padding:9px 12px;font-size:10px;font-weight:700;color:#A09080;text-transform:uppercase;letter-spacing:.05em;border-bottom:2px solid #E5DDD0;cursor:pointer;user-select:none}
+.cli-table th:hover{background:#F5F0EA}
+.cli-table th.r,.cli-table td.r{text-align:right}
+.cli-table td{padding:8px 12px;border-bottom:1px solid #F5F0EA;vertical-align:middle}
+.cli-table tr:hover td{background:#F5F0EA}
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(3,63,99,.45);z-index:9999;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal-box{background:#fff;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.22);width:100%;max-width:760px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden}
+.modal-header{background:#5C4528;padding:15px 22px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.modal-title{font-size:14px;font-weight:700;color:#fff}
+.modal-sub{font-size:11px;color:rgba(255,255,255,.65);margin-top:2px}
+.modal-close{background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:8px;padding:5px 12px;font-size:13px;cursor:pointer;font-weight:600;font-family:inherit}
+.modal-close:hover{background:rgba(255,255,255,.25)}
+.modal-body{overflow-y:auto}
+.modal-table{width:100%;border-collapse:collapse;font-size:12px}
+.modal-table th{position:sticky;top:0;background:#F5F0EA;padding:9px 14px;font-size:10px;font-weight:700;color:#A09080;text-transform:uppercase;letter-spacing:.05em;border-bottom:2px solid #E5DDD0;text-align:left}
+.modal-table th.r,.modal-table td.r{text-align:right}
+.modal-table td{padding:8px 14px;border-bottom:1px solid #F5F0EA;color:#3D3020}
+.modal-table tr:hover td{background:#F5F0EA}
+.modal-table tr.total-row td{background:#F4EFE8;font-weight:700;color:#5C4528;border-top:2px solid #E5DDD0}
+.modal-footer{padding:11px 20px;border-top:1px solid #E5DDD0;background:#F5F0EA;font-size:11px;color:#A09080;text-align:center;flex-shrink:0}
+canvas{cursor:pointer}
+footer{text-align:center;font-size:11px;color:#A09080;padding:10px 0 18px}
+
+
+.nav-links{display:flex;align-items:center;gap:2px}
+.nav-hamburger{display:none;background:none;border:none;cursor:pointer;padding:10px;color:#fff;font-size:22px;margin-left:auto}
+.nav-mobile{display:none;flex-direction:column;background:#4A3620;border-top:1px solid rgba(255,255,255,.1)}
+.nav-mobile.open{display:flex}
+.nav-mobile a{padding:13px 22px;font-size:13px;font-weight:600;color:rgba(255,255,255,.75);border-bottom:1px solid rgba(255,255,255,.08)}
+.nav-mobile a.active{color:#D4B86A;background:rgba(255,255,255,.12)}
+.nav-mobile a:hover{background:rgba(255,255,255,.1);color:#fff}
+/* Modal improvements */
+.modal-body{padding:16px 20px !important}
+.modal-box{max-height:80vh}
+
+@media(max-width:768px){
+  .nav-links{display:none}
+  .nav-hamburger{display:block}
+  .container{padding:12px 14px;gap:12px}
+  .grid5{grid-template-columns:1fr 1fr}
+  .grid2{grid-template-columns:1fr}
+  .filters{gap:10px}
+  select{min-width:100px}
+  canvas{max-height:200px}
+  .modal-box{width:100% !important;max-width:100% !important;height:auto;max-height:92vh !important;border-radius:12px !important;margin:0 8px}
+  .modal-overlay{padding:10px}
+  .cli-table{font-size:11px}
+}
+@media(max-width:480px){
+  .grid5{grid-template-columns:1fr}
+  .kpi-value{font-size:16px}
+}
+</style>
+</head><body>
+<nav style="background:#5C4528;border-bottom:1px solid rgba(255,255,255,.1)">
+ <div style="padding:0 22px;display:flex;align-items:center">
+  <span style="font-size:11px;font-weight:500;color:#fff;text-transform:uppercase;letter-spacing:.09em;padding:11px 0;margin-right:16px;flex-shrink:0">CMA Paraguay S.A.</span>
+  <div class="nav-links">
+         <a href="Dashboard_Resumen.html" style="padding:9px 16px;border-radius:6px 6px 0 0;font-size:12px;font-weight:600;color:rgba(255,255,255,.6)">🏠 Resumen</a>
+         <a href="Dashboard_Operaciones.html" style="padding:9px 16px;border-radius:6px 6px 0 0;font-size:12px;font-weight:600;color:rgba(255,255,255,.6)">C. a Pagar</a>
+         <a href="Dashboard_Bancos.html" style="padding:9px 16px;border-radius:6px 6px 0 0;font-size:12px;font-weight:600;color:rgba(255,255,255,.6)">Financiam.</a>
+         <a href="Dashboard_Clientes.html" style="padding:9px 16px;border-radius:6px 6px 0 0;font-size:12px;font-weight:600;background:rgba(255,255,255,.18);color:#fff">Clientes</a>
+  
+         <a href="Dashboard_Flujo.html" style="padding:9px 16px;border-radius:6px 6px 0 0;font-size:12px;font-weight:600;color:rgba(255,255,255,.6)">Flujo de Caja</a>
+  </div>
+  <button class="nav-hamburger" onclick="toggleNav()" aria-label="Menú">☰</button>
+ </div>
+ <div class="nav-mobile" id="nav-mobile">
+         <a href="Dashboard_Resumen.html">🏠 Resumen Ejecutivo</a>
+         <a href="Dashboard_Operaciones.html">Cuentas a Pagar</a>
+         <a href="Dashboard_Bancos.html">Financiamiento</a>
+         <a href="Dashboard_Clientes.html" class="active">Cuentas por Cobrar</a>
+          <a href="Dashboard_Flujo.html">Flujo de Caja</a>
+ </div>
+</nav>
+
+<div style="background:linear-gradient(135deg,#8B7355 0%,#5C4528 100%);padding:16px 26px;display:flex;align-items:center;justify-content:space-between">
+ <div>
+ <div style="font-size:10px;font-weight:500;color:#fff;text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px">CMA Paraguay S.A.</div>
+ <div style="font-size:21px;font-weight:600;color:#fff;letter-spacing:-.3px"> Cuentas por Cobrar</div>
+ <div style="font-size:11px;color:rgba(255,255,255,.7);margin-top:2px">Última actualización: 12/05/2026</div>
+ </div>
+ <div style="text-align:right">
+ <div style="font-size:24px;font-weight:600;color:#fff" id="hdr-count">—</div>
+ <div style="font-size:11px;color:rgba(255,255,255,.7)">facturas filtradas</div>
+ </div>
+</div>
+
+
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+ <div class="modal-box">
+ <div class="modal-header">
+ <div>
+ <div class="modal-title" id="modal-title">Detalle</div>
+ <div class="modal-sub" id="modal-sub"></div>
+ </div>
+ <button class="modal-close" onclick="closeDetailModal()"> Cerrar</button>
+ </div>
+ <div class="modal-body" id="modal-body" style="overflow-y:auto;flex:1;padding:0"></div>
+ <div class="modal-footer" id="modal-footer"></div>
+ </div>
+</div>
+<div class="container">
+
+ <!-- FILTROS -->
+ <div class="card">
+ <div class="filters">
+ <div class="fg"><label>Estado</label><div class="btn-group">
+ <button class="tag active" data-val="Todos" onclick="setF('estado',this)">Todos</button>
+ <button class="tag" data-val="COBRADO" onclick="setF('estado',this)">Cobrado</button>
+ <button class="tag" data-val="VENCIDO" onclick="setF('estado',this)">Vencido</button>
+ <button class="tag" data-val="A VENCER" onclick="setF('estado',this)">A Vencer</button>
+ </div></div>
+ <div class="fg"><label>Cliente</label>
+ <select id="sel-cli" onchange="st.cli=this.value;render()">
+ <option value="Todos">Todos los clientes</option>
+ </select>
+ </div>
+ <div class="fg"><label>Año</label>
+ <select id="sel-anio" onchange="st.anio=this.value;render()">
+ <option value="Todos">Todos los años</option>
+
+ </select>
+ </div>
+ <div class="fg"><label>Mes</label>
+ <select id="sel-mes" onchange="st.mes=this.value;render()">
+ <option value="Todos">Todos los meses</option>
+ </select>
+ </div>
+ <div class="fg"><label>Antigüedad</label>
+ <select id="sel-aging" onchange="st.aging=this.value;render()">
+ <option value="Todos">Todos los rangos</option>
+ </select>
+ </div>
+ </div>
+ </div>
+
+ <!-- KPIs -->
+ <div class="grid5">
+ <div class="kpi" style="border-left:4px solid #5C4528">
+ <div class="kpi-label" style="color:#5C4528">Total Facturado <span>$</span></div>
+ <div class="kpi-value" id="k-total" style="color:#5C4528">—</div>
+ <div class="kpi-sub" id="k-total-s"></div>
+ </div>
+ <div class="kpi" style="border-left:4px solid #9B8870">
+ <div class="kpi-label" style="color:#9B8870">Cobrado <span></span></div>
+ <div class="kpi-value" id="k-cob" style="color:#9B8870">—</div>
+ <div class="kpi-sub" id="k-cob-s"></div>
+ </div>
+ <div class="kpi" style="border-left:4px solid #dc2626">
+ <div class="kpi-label" style="color:#dc2626">Vencido <span></span></div>
+ <div class="kpi-value" id="k-ven" style="color:#dc2626">—</div>
+ <div class="kpi-sub" id="k-ven-s"></div>
+ </div>
+ <div class="kpi" style="border-left:4px solid #8B7355">
+ <div class="kpi-label" style="color:#8B7355">A Vencer <span></span></div>
+ <div class="kpi-value" id="k-avc" style="color:#8B7355">—</div>
+ <div class="kpi-sub" id="k-avc-s"></div>
+ </div>
+ <div class="kpi" style="border-left:4px solid #C4B08A">
+ <div class="kpi-label" style="color:#C4B08A">% Cobrado <span></span></div>
+ <div class="kpi-value" id="k-pct" style="color:#C4B08A">—</div>
+ <div class="kpi-sub" id="k-pct-s"></div>
+ </div>
+ </div>
+
+ <div class="grid2">
+ <!-- Donut estado -->
+ <div class="card">
+ <div class="section-title">Distribución por Estado</div>
+ <div style="display:flex;gap:16px;align-items:center">
+ <div style="width:170px;flex-shrink:0"><canvas id="c-donut"></canvas></div>
+ <div id="donut-leg" style="flex:1;display:flex;flex-direction:column;gap:9px;font-size:11.5px"></div>
+ </div>
+ </div>
+ <!-- Facturación por mes -->
+ <div class="card">
+ <div class="section-title">Facturación por Mes de Vencimiento</div>
+ <canvas id="c-monthly" height="190"></canvas>
+ </div>
+ </div>
+
+ <div class="grid2">
+ <!-- Clientes bar -->
+ <div class="card">
+ <div class="section-title">Facturación Cobrada por Cliente</div>
+ <canvas id="c-clientes" height="230"></canvas>
+ </div>
+ <!-- Aging -->
+ <div class="card">
+ <div class="section-title">Antigüedad del Saldo Vencido</div>
+ <canvas id="c-aging" height="230"></canvas>
+ </div>
+ </div>
+
+ <!-- Rating / Status + Ranking Atraso -->
+ <div class="grid2">
+ <div class="card">
+ <div class="section-title">Estado de Cobranza por Cliente</div>
+ <div style="overflow-x:auto">
+ <table class="cli-table" id="cli-table">
+ <thead><tr>
+ <th onclick="sortTable('cli')">Cliente ↕</th>
+ <th class="r" onclick="sortTable('fac')">Fact. ↕</th>
+ <th class="r" onclick="sortTable('total')">Total USD ↕</th>
+ <th class="r" onclick="sortTable('vencido')">Vencido ↕</th>
+ <th class="r" onclick="sortTable('avencer')">A Vencer ↕</th>
+ <th class="r" onclick="sortTable('cobrado')">Cobrado ↕</th>
+ <th class="r" onclick="sortTable('dias')">Días Prom. ↕</th>
+ <th>Calificación</th>
+ </tr></thead>
+ <tbody id="cli-body"></tbody>
+ </table>
+ </div>
+ </div>
+
+ <div class="card">
+ <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:13px">
+  <div class="section-title" style="margin-bottom:0">Clientes con Mayor Promedio de Atraso</div>
+  <span style="font-size:10px;color:#A09080">
+   <span style="color:#dc2626;font-weight:700">V</span> = vencido actual &nbsp;·&nbsp;
+   <span style="color:#9B8870;font-weight:700">C</span> = historial cobros
+  </span>
+ </div>
+ <table style="width:100%;border-collapse:collapse;font-size:12px">
+ <thead><tr style="background:#F5F0EA">
+ <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:600;color:#A09080;text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid #E5DDD0">#</th>
+ <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:600;color:#A09080;text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid #E5DDD0">Cliente</th>
+ <th style="padding:9px 12px;text-align:right;font-size:10px;font-weight:600;color:#A09080;text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid #E5DDD0">Prom. total</th>
+ <th style="padding:9px 12px;text-align:right;font-size:10px;font-weight:600;color:#A09080;text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid #E5DDD0">V · C</th>
+ <th style="padding:9px 12px;text-align:right;font-size:10px;font-weight:600;color:#A09080;text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid #E5DDD0">Facturas</th>
+ <th style="padding:9px 12px;text-align:right;font-size:10px;font-weight:600;color:#A09080;text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid #E5DDD0">Saldo vencido</th>
+ </tr></thead>
+ <tbody id="delay-ranking-body"></tbody>
+ </table>
+ </div>
+ </div>
+
+ <footer>CMA Paraguay S.A. · Cuentas por Cobrar · Datos SAP · Última actualización 12/05/2026</footer>
+</div>
+
+<script>
+const ALL_DATA = [{"cli":"COTO C.I.C.S.A.","fac":"001-002-0000159","saldo":52668.0,"dias":-2,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-03","fvenc":"2026-05-14","mes":"mayo","anio":2026,"cobro":"PENDIENTE","com":"Aplica NC,","incobrable":false},{"cli":"INC S.A.","fac":"001-002-0000168","saldo":53928.0,"dias":-2,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-03","fvenc":"2026-05-14","mes":"mayo","anio":2026,"cobro":"PENDIENTE","com":"","incobrable":false},{"cli":"CENCOSUD S.A.","fac":"001-002-0000163","saldo":51408.0,"dias":-5,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-03","fvenc":"2026-05-17","mes":"mayo","anio":2026,"cobro":"PENDIENTE","com":"Aplica NC.","incobrable":false},{"cli":"COTO C.I.C.S.A.","fac":"001-002-0000167","saldo":52668.0,"dias":-6,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-03","fvenc":"2026-05-18","mes":"mayo","anio":2026,"cobro":"PENDIENTE","com":"JAR4300012174. Aplica NC","incobrable":false},{"cli":"GLORIA SACEI","fac":"001-001-0000044","saldo":29788.62,"dias":-7,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-03","fvenc":"2026-05-19","mes":"mayo","anio":2026,"cobro":"PENDIENTE","com":"","incobrable":false},{"cli":"COTO C.I.C.S.A.","fac":"001-002-0000166","saldo":52668.0,"dias":-7,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-03","fvenc":"2026-05-19","mes":"mayo","anio":2026,"cobro":"PENDIENTE","com":"Aplica NC","incobrable":false},{"cli":"COTO C.I.C.S.A.","fac":"001-002-0000151","saldo":52668.0,"dias":-7,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-02","fvenc":"2026-05-19","mes":"mayo","anio":2026,"cobro":"PENDIENTE","com":"Aplica NC","incobrable":false},{"cli":"INC S.A.","fac":"001-002-0000174","saldo":53928.0,"dias":-8,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-03","fvenc":"2026-05-20","mes":"mayo","anio":2026,"cobro":"PENDIENTE","com":"Se aguarda fecha de nacionalización","incobrable":false},{"cli":"INC S.A.","fac":"001-002-0000176","saldo":53928.0,"dias":-8,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-04","fvenc":"2026-05-20","mes":"mayo","anio":2026,"cobro":"PENDIENTE","com":"Se aguarda fecha de nacionalización","incobrable":false},{"cli":"INC S.A.","fac":"001-002-0000183","saldo":53928.0,"dias":-10,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-03","fvenc":"2026-05-22","mes":"mayo","anio":2026,"cobro":"PENDIENTE","com":"Se aguarda fecha de nacionalización","incobrable":false},{"cli":"GLORIA SACEI","fac":"001-001-0000052","saldo":65015.94,"dias":-11,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-04","fvenc":"2026-05-23","mes":"mayo","anio":2026,"cobro":"PENDIENTE","com":"","incobrable":false},{"cli":"INDUSTRIAL DELIGHTS S.A.","fac":"001-001-0000047","saldo":52920.0,"dias":-14,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-03","fvenc":"2026-05-26","mes":"mayo","anio":2026,"cobro":"PENDIENTE","com":"","incobrable":false},{"cli":"GLORIA SACEI","fac":"001-001-0000048","saldo":27864.0,"dias":-17,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-03","fvenc":"2026-05-29","mes":"mayo","anio":2026,"cobro":"PENDIENTE","com":"","incobrable":false},{"cli":"INC S.A.","fac":"001-002-0000179","saldo":53928.0,"dias":-17,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-04","fvenc":"2026-05-29","mes":"mayo","anio":2026,"cobro":"PENDIENTE","com":"Se aguarda fecha de nacionalización. Se envió correo solicitando información","incobrable":false},{"cli":"INC S.A.","fac":"001-002-0000185","saldo":53928.0,"dias":-17,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-04","fvenc":"2026-05-29","mes":"mayo","anio":2026,"cobro":"PENDIENTE","com":"Se aguarda fecha de nacionalización. Se envió correo solicitando información","incobrable":false},{"cli":"INDUSTRIAL DELIGHTS S.A.","fac":"001-001-0000049","saldo":52920.0,"dias":-18,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-03","fvenc":"2026-05-30","mes":"mayo","anio":2026,"cobro":"PENDIENTE","com":"","incobrable":false},{"cli":"COTO C.I.C.S.A.","fac":"001-002-0000170","saldo":52668.0,"dias":-22,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-03","fvenc":"2026-06-03","mes":"junio","anio":2026,"cobro":"PENDIENTE","com":"Aplica NC","incobrable":false},{"cli":"COTO C.I.C.S.A.","fac":"001-002-0000175","saldo":52668.0,"dias":-22,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-03","fvenc":"2026-06-03","mes":"junio","anio":2026,"cobro":"PENDIENTE","com":"Aplica NC","incobrable":false},{"cli":"INC S.A.","fac":"001-002-0000186","saldo":53928.0,"dias":-23,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-04","fvenc":"2026-06-04","mes":"junio","anio":2026,"cobro":"PENDIENTE","com":"","incobrable":false},{"cli":"LUVIK S.A.","fac":"001-002-0000189","saldo":52920.0,"dias":-23,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-04","fvenc":"2026-06-04","mes":"junio","anio":2026,"cobro":"PENDIENTE","com":"se aguarda fecha de nacionalización","incobrable":false},{"cli":"INC S.A","fac":"001-002-0000193","saldo":53928.0,"dias":-26,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-04","fvenc":"2026-06-07","mes":"junio","anio":2026,"cobro":"PENDIENTE","com":"","incobrable":false},{"cli":"INC S.A","fac":"001-002-0000190","saldo":53928.0,"dias":-26,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-04","fvenc":"2026-06-07","mes":"junio","anio":2026,"cobro":"PENDIENTE","com":"","incobrable":false},{"cli":"GLORIA SACEI","fac":"001-001-0000050","saldo":48865.2,"dias":-27,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-04","fvenc":"2026-06-08","mes":"junio","anio":2026,"cobro":"PENDIENTE","com":"","incobrable":false},{"cli":"COTO C.I.C.S.A.","fac":"001-002-0000177","saldo":52668.0,"dias":-27,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-03","fvenc":"2026-06-08","mes":"junio","anio":2026,"cobro":"PENDIENTE","com":"Aplica NC","incobrable":false},{"cli":"LUVIK S.A.","fac":"001-002-0000206","saldo":47124.0,"dias":-27,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-04","fvenc":"2026-06-08","mes":"junio","anio":2026,"cobro":"PENDIENTE","com":"se aguarda fecha de nacionalización","incobrable":false},{"cli":"COTO C.I.C.S.A.","fac":"001-002-0000181","saldo":52668.0,"dias":-34,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-04","fvenc":"2026-06-15","mes":"junio","anio":2026,"cobro":"PENDIENTE","com":"Aplica NC","incobrable":false},{"cli":"COTO C.I.C.S.A.","fac":"001-002-0000182","saldo":52668.0,"dias":-34,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-04","fvenc":"2026-06-15","mes":"junio","anio":2026,"cobro":"PENDIENTE","com":"Aplica NC","incobrable":false},{"cli":"COTO C.I.C.S.A.","fac":"001-002-0000184","saldo":52668.0,"dias":-35,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-04","fvenc":"2026-06-16","mes":"junio","anio":2026,"cobro":"PENDIENTE","com":"Aplica NC","incobrable":false},{"cli":"COTO C.I.C.S.A.","fac":"001-002-0000180","saldo":52668.0,"dias":-37,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-04","fvenc":"2026-06-18","mes":"junio","anio":2026,"cobro":"PENDIENTE","com":"Aplica NC.","incobrable":false},{"cli":"COTO C.I.C.S.A.","fac":"001-002-0000178","saldo":52668.0,"dias":-37,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-04","fvenc":"2026-06-18","mes":"junio","anio":2026,"cobro":"PENDIENTE","com":"Aplica NC.","incobrable":false},{"cli":"COTO C.I.C.S.A.","fac":"001-002-0000197","saldo":52668.0,"dias":-42,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-04","fvenc":"2026-06-23","mes":"junio","anio":2026,"cobro":"PENDIENTE","com":"Aplica NC.","incobrable":false},{"cli":"GLORIA SACEI","fac":"001-001-0000054","saldo":16253.93,"dias":-47,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-04","fvenc":"2026-06-28","mes":"junio","anio":2026,"cobro":"PENDIENTE","com":"","incobrable":false},{"cli":"COTO C.I.C.S.A.","fac":"001-002-0000203","saldo":52668.0,"dias":-50,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-04","fvenc":"2026-07-01","mes":"julio","anio":2026,"cobro":"PENDIENTE","com":"Aplica NC","incobrable":false},{"cli":"COTO C.I.C.S.A.","fac":"001-002-0000204","saldo":52668.0,"dias":-50,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-04","fvenc":"2026-07-01","mes":"julio","anio":2026,"cobro":"PENDIENTE","com":"Aplica NC","incobrable":false},{"cli":"COTO C.I.C.S.A.","fac":"001-002-0000194","saldo":52668.0,"dias":-50,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-04","fvenc":"2026-07-01","mes":"julio","anio":2026,"cobro":"PENDIENTE","com":"Aplica NC","incobrable":false},{"cli":"COTO C.I.C.S.A.","fac":"001-002-0000198","saldo":52668.0,"dias":-51,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-04","fvenc":"2026-07-02","mes":"julio","anio":2026,"cobro":"PENDIENTE","com":"Aplica NC","incobrable":false},{"cli":"COTO C.I.C.S.A.","fac":"001-002-0000202","saldo":52668.0,"dias":-51,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-04","fvenc":"2026-07-02","mes":"julio","anio":2026,"cobro":"PENDIENTE","com":"Aplica NC","incobrable":false},{"cli":"INC S.A","fac":"001-002-0000192","saldo":53928.0,"dias":0,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-04","fvenc":"","mes":"-","anio":2026,"cobro":"PENDIENTE","com":"se aguarda fecha de nacionalización","incobrable":false},{"cli":"INC S.A.","fac":"001-002-0000188","saldo":53928.0,"dias":0,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-04","fvenc":"","mes":"-","anio":2026,"cobro":"PENDIENTE","com":"previsto cargar la prox semana","incobrable":false},{"cli":"INC S.A","fac":"001-002-0000196","saldo":53928.0,"dias":0,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-04","fvenc":"","mes":"-","anio":2026,"cobro":"PENDIENTE","com":"se aguarda fecha de nacionalización","incobrable":false},{"cli":"AUTOSERVICIO MAYORISTA DIARCO S.A.","fac":"001-002-0000207","saldo":54936.0,"dias":0,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-04","fvenc":"","mes":"-","anio":2026,"cobro":"PENDIENTE","com":"se aguarda fecha de nacionalización","incobrable":false},{"cli":"CENCOSUD S.A.","fac":"001-002-0000187","saldo":51408.0,"dias":0,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-04","fvenc":"","mes":"-","anio":2026,"cobro":"PENDIENTE","com":"previsto cargar el viernes 08/05","incobrable":false},{"cli":"CENCOSUD S.A.","fac":"001-002-0000191","saldo":51408.0,"dias":0,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-04","fvenc":"","mes":"-","anio":2026,"cobro":"PENDIENTE","com":"previsto cargar el viernes 08/05","incobrable":false},{"cli":"INC S.A","fac":"001-002-0000210","saldo":53928.0,"dias":0,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-04","fvenc":"","mes":"-","anio":2026,"cobro":"PENDIENTE","com":"Pendiente INAL","incobrable":false},{"cli":"COTO C.I.C.S.A.","fac":"001-002-0000195","saldo":52668.0,"dias":0,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-04","fvenc":"","mes":"-","anio":2026,"cobro":"PENDIENTE","com":"Pendiente INAL. Aplica NC","incobrable":false},{"cli":"COTO C.I.C.S.A.","fac":"001-002-0000209","saldo":52668.0,"dias":0,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-04","fvenc":"","mes":"-","anio":2026,"cobro":"PENDIENTE","com":"Documentos enviados al cliente. Aplica NC","incobrable":false},{"cli":"GP ALIMENTOS SA","fac":"001-002-0000217","saldo":52920.0,"dias":0,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-05","fvenc":"","mes":"-","anio":2026,"cobro":"PENDIENTE","com":"Documentos enviados al cliente","incobrable":false},{"cli":"COTO C.I.C.S.A.","fac":"001-002-0000218","saldo":52668.0,"dias":0,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-05","fvenc":"","mes":"-","anio":2026,"cobro":"PENDIENTE","com":"Documentos enviados al cliente. Aplica NC","incobrable":false},{"cli":"INC S.A.","fac":"001-002-0000212","saldo":53928.0,"dias":0,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-05","fvenc":"","mes":"-","anio":2026,"cobro":"PENDIENTE","com":"Documentos enviados al cliente.","incobrable":false},{"cli":"COTO C.I.C.S.A.","fac":"001-002-0000211","saldo":52668.0,"dias":0,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-04","fvenc":"","mes":"-","anio":2026,"cobro":"PENDIENTE","com":"Documentos enviados al cliente. Aplica NC","incobrable":false},{"cli":"COTO C.I.C.S.A.","fac":"001-002-0000201","saldo":52668.0,"dias":0,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-04","fvenc":"","mes":"-","anio":2026,"cobro":"PENDIENTE","com":"Pendiente INAL. Aplica NC","incobrable":false},{"cli":"COTO C.I.C.S.A.","fac":"001-002-0000214","saldo":55440.0,"dias":0,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-06","fvenc":"","mes":"-","anio":2026,"cobro":"PENDIENTE","com":"Documentos enviados al cliente. Aplica NC","incobrable":false},{"cli":"GP ALIMENTOS SA","fac":"001-002-0000224","saldo":52920.0,"dias":0,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-05","fvenc":"","mes":"-","anio":2026,"cobro":"PENDIENTE","com":"Documentos enviados al cliente.","incobrable":false},{"cli":"DULCIS DENTE SRL","fac":"001-002-0000199","saldo":40320.0,"dias":0,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-04","fvenc":"","mes":"-","anio":2026,"cobro":"PENDIENTE","com":"Documentos enviados al cliente.","incobrable":false},{"cli":"INC S.A.","fac":"001-002-0000208","saldo":53928.0,"dias":0,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-04","fvenc":"","mes":"-","anio":2026,"cobro":"PENDIENTE","com":"Documentos enviados al cliente.","incobrable":false},{"cli":"COTO C.I.C.S.A.","fac":"001-002-0000213","saldo":55440.0,"dias":0,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-05","fvenc":"","mes":"-","anio":2026,"cobro":"PENDIENTE","com":"Documentos enviados al cliente. Aplica NC","incobrable":false},{"cli":"COTO C.I.C.S.A.","fac":"001-002-0000215","saldo":55440.0,"dias":0,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-06","fvenc":"","mes":"-","anio":2026,"cobro":"PENDIENTE","com":"Documentos enviados al cliente. Aplica NC","incobrable":false},{"cli":"INC S.A.","fac":"001-002-0000216","saldo":53928.0,"dias":0,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-06","fvenc":"","mes":"-","anio":2026,"cobro":"PENDIENTE","com":"Documentos enviados al cliente.","incobrable":false},{"cli":"INC S.A.","fac":"001-002-0000219","saldo":53928.0,"dias":0,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-05","fvenc":"","mes":"-","anio":2026,"cobro":"PENDIENTE","com":"Documentos enviados al cliente.","incobrable":false},{"cli":"CENCOSUD S.A.","fac":"001-002-0000220","saldo":52920.0,"dias":0,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-05","fvenc":"","mes":"-","anio":2026,"cobro":"PENDIENTE","com":"Documentos enviados al cliente. Aplica NC","incobrable":false},{"cli":"CENCOSUD S.A.","fac":"001-002-0000221","saldo":52920.0,"dias":0,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-05","fvenc":"","mes":"-","anio":2026,"cobro":"PENDIENTE","com":"Documentos enviados al cliente. Aplica NC","incobrable":false},{"cli":"INC S.A.","fac":"001-002-0000222","saldo":53928.0,"dias":0,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-05","fvenc":"","mes":"-","anio":2026,"cobro":"PENDIENTE","com":"Documentos enviados al cliente.","incobrable":false},{"cli":"GP ALIMENTOS SA","fac":"001-002-0000223","saldo":52920.0,"dias":0,"estado":"A VENCER","aging":"A Vencer","rating":"A VENCER","f":"2026-05","fvenc":"","mes":"-","anio":2026,"cobro":"PENDIENTE","com":"Documentos enviados al cliente.","incobrable":false},{"cli":"CAPITAL TRADE IMPORTACAO & EXPORTACAO LTDA","fac":"001-001-0001358","saldo":15478.2,"dias":501,"estado":"VENCIDO","aging":"180+ días","rating":"Crítico","f":"2024-12","fvenc":"2024-12-27","mes":"diciembre","anio":2024,"cobro":"PENDIENTE","com":"","incobrable":true},{"cli":"CAPITAL TRADE IMPORTACAO & EXPORTACAO LTDA","fac":"001-002-0000016","saldo":23562.0,"dias":271,"estado":"VENCIDO","aging":"180+ días","rating":"Crítico","f":"2025-05","fvenc":"2025-08-14","mes":"agosto","anio":2025,"cobro":"PENDIENTE","com":"","incobrable":true},{"cli":"INC S.A.","fac":"001-002-0000147","saldo":53928.0,"dias":23,"estado":"VENCIDO","aging":"1-30 días","rating":"Riesgo Bajo","f":"2026-02","fvenc":"2026-04-19","mes":"abril","anio":2026,"cobro":"PENDIENTE","com":"pendiente de acreditación","incobrable":false},{"cli":"INDUSTRIAL DELIGHTS S.A.","fac":"001-001-0000038","saldo":37800.0,"dias":18,"estado":"VENCIDO","aging":"1-30 días","rating":"Riesgo Bajo","f":"2026-03","fvenc":"2026-04-24","mes":"abril","anio":2026,"cobro":"PENDIENTE","com":"previsto para cobrar el  jueves 07/05","incobrable":false},{"cli":"GP ALIMENTOS S.A.","fac":"001-002-0000161","saldo":51408.0,"dias":11,"estado":"VENCIDO","aging":"1-30 días","rating":"Riesgo Bajo","f":"2026-03","fvenc":"2026-05-01","mes":"mayo","anio":2026,"cobro":"PENDIENTE","com":"previsto para cobrar la prox semana","incobrable":false},{"cli":"GP ALIMENTOS S.A.","fac":"001-002-0000164","saldo":51408.0,"dias":11,"estado":"VENCIDO","aging":"1-30 días","rating":"Riesgo Bajo","f":"2026-03","fvenc":"2026-05-01","mes":"mayo","anio":2026,"cobro":"PENDIENTE","com":"previsto para cobrar la prox semana","incobrable":false},{"cli":"COTO C.I.C.S.A.","fac":"001-002-0000158","saldo":52668.0,"dias":6,"estado":"VENCIDO","aging":"1-30 días","rating":"Riesgo Bajo","f":"2026-03","fvenc":"2026-05-06","mes":"mayo","anio":2026,"cobro":"PENDIENTE","com":"pendiente de acreditación","incobrable":false},{"cli":"LUVIK S.A.","fac":"001-002-0000169","saldo":52920.0,"dias":6,"estado":"VENCIDO","aging":"1-30 días","rating":"Riesgo Bajo","f":"2026-03","fvenc":"2026-05-06","mes":"mayo","anio":2026,"cobro":"PENDIENTE","com":"aguardamos respuestas del cliente, volvemos a insistir","incobrable":false},{"cli":"MARVI S.R.L.","fac":"001-001-0000041","saldo":42228.0,"dias":4,"estado":"VENCIDO","aging":"1-30 días","rating":"Riesgo Bajo","f":"2026-03","fvenc":"2026-05-08","mes":"mayo","anio":2026,"cobro":"PENDIENTE","com":"se deposita cheque para la quincena","incobrable":false},{"cli":"LESTONSUR S.A.","fac":"001-001-0000122","saldo":46872.0,"dias":2,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-01","fvenc":"2026-01-14","mes":"enero","anio":2026,"cobro":"2026-01-16","com":"","incobrable":false},{"cli":"PARTNER COMUNICACIÓN MEXICO","fac":"001-001-0000119","saldo":3882.6,"dias":13,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-01","fvenc":"2026-01-09","mes":"enero","anio":2026,"cobro":"2026-01-22","com":"","incobrable":false},{"cli":"GP ALIMENTOS SA","fac":"001-002-0000111","saldo":51408.0,"dias":28,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2025-12","fvenc":"2025-12-30","mes":"diciembre","anio":2025,"cobro":"2026-01-27","com":"","incobrable":false},{"cli":"HANSA LTDA","fac":"001-002-0000114","saldo":29297.32,"dias":0,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-12","fvenc":"2026-01-29","mes":"enero","anio":2026,"cobro":"2026-01-29","com":"","incobrable":false},{"cli":"MARVI S.A.","fac":"001-001-0000023","saldo":19885.7,"dias":0,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2025-12","fvenc":"2026-02-03","mes":"febrero","anio":2026,"cobro":"2026-02-03","com":"","incobrable":false},{"cli":"LESTONSUR S.A.","fac":"001-002-0000138","saldo":37155.07,"dias":5,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-01","fvenc":"2026-01-30","mes":"enero","anio":2026,"cobro":"2026-02-04","com":"","incobrable":false},{"cli":"COTO C.I.C.S.A.","fac":"001-002-0000107","saldo":52668.0,"dias":0,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2025-12","fvenc":"2026-02-06","mes":"febrero","anio":2026,"cobro":"2026-02-06","com":"","incobrable":false},{"cli":"GLORIA SACEI","fac":"001-001-0000019","saldo":24389.77,"dias":-4,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2025-12","fvenc":"2026-02-10","mes":"febrero","anio":2026,"cobro":"2026-02-06","com":"","incobrable":false},{"cli":"DELRE BENEDICTO NICOLAS S.R.L","fac":"001-002-0000113","saldo":52920.0,"dias":1,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2025-12","fvenc":"2026-02-15","mes":"febrero","anio":2026,"cobro":"2026-02-16","com":"","incobrable":false},{"cli":"MAYCAR S.A.","fac":"001-002-0000128","saldo":47598.4,"dias":12,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-01","fvenc":"2026-02-06","mes":"febrero","anio":2026,"cobro":"2026-02-18","com":"","incobrable":false},{"cli":"COTO C.I.C.S.A.","fac":"001-002-0000109","saldo":55440.0,"dias":3,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2025-12","fvenc":"2026-02-16","mes":"febrero","anio":2026,"cobro":"2026-02-19","com":"","incobrable":false},{"cli":"MAYCAR S.A.","fac":"001-002-0000139","saldo":47598.4,"dias":8,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-02","fvenc":"2026-02-12","mes":"febrero","anio":2026,"cobro":"2026-02-20","com":"","incobrable":false},{"cli":"INDUSTRIAL DELIGHTS S.A.","fac":"001-001-0000022","saldo":24570.0,"dias":4,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2025-12","fvenc":"2026-02-23","mes":"febrero","anio":2026,"cobro":"2026-02-27","com":"","incobrable":false},{"cli":"GLORIA SACEI","fac":"001-001-0000025","saldo":13303.51,"dias":-7,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-01","fvenc":"2026-03-06","mes":"marzo","anio":2026,"cobro":"2026-02-27","com":"","incobrable":false},{"cli":"LUVIK S.A.","fac":"001-002-0000116","saldo":52920.0,"dias":16,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2025-12","fvenc":"2026-02-15","mes":"febrero","anio":2026,"cobro":"2026-03-03","com":"","incobrable":false},{"cli":"MAYCAR S.A.","fac":"001-002-0000132","saldo":47678.4,"dias":9,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-01","fvenc":"2026-02-23","mes":"febrero","anio":2026,"cobro":"2026-03-04","com":"","incobrable":false},{"cli":"MAYCAR S.A.","fac":"001-002-0000128","saldo":80.0,"dias":28,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-01","fvenc":"2026-02-06","mes":"febrero","anio":2026,"cobro":"2026-03-06","com":"","incobrable":false},{"cli":"MAYCAR S.A.","fac":"001-002-0000139","saldo":80.0,"dias":22,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-02","fvenc":"2026-02-12","mes":"febrero","anio":2026,"cobro":"2026-03-06","com":"","incobrable":false},{"cli":"INC S.A.","fac":"001-002-0000108","saldo":53928.0,"dias":17,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2025-12","fvenc":"2026-02-20","mes":"febrero","anio":2026,"cobro":"2026-03-09","com":"","incobrable":false},{"cli":"DELRE BENEDICTO NICOLAS S.R.L","fac":"001-001-0000118","saldo":52920.0,"dias":9,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-01","fvenc":"2026-02-28","mes":"febrero","anio":2026,"cobro":"2026-03-09","com":"","incobrable":false},{"cli":"MAYCAR S.A.","fac":"001-002-0000154","saldo":47678.4,"dias":7,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-02","fvenc":"2026-03-04","mes":"marzo","anio":2026,"cobro":"2026-03-11","com":"","incobrable":false},{"cli":"MAYCAR S.A.","fac":"001-002-0000150","saldo":47007.6,"dias":10,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-02","fvenc":"2026-03-02","mes":"marzo","anio":2026,"cobro":"2026-03-12","com":"","incobrable":false},{"cli":"MAYCAR S.A.","fac":"001-002-0000155","saldo":47678.4,"dias":6,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-02","fvenc":"2026-03-06","mes":"marzo","anio":2026,"cobro":"2026-03-12","com":"","incobrable":false},{"cli":"COTO C.I.C.S.A.","fac":"001-002-0000115","saldo":52668.0,"dias":2,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2025-12","fvenc":"2026-03-11","mes":"marzo","anio":2026,"cobro":"2026-03-13","com":"","incobrable":false},{"cli":"SOCIEDAD ANONIMA IMPORTADORA Y EXPORTADORA DE LA PATAGONIA","fac":"001-002-0000130","saldo":55440.0,"dias":4,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-01","fvenc":"2026-03-12","mes":"marzo","anio":2026,"cobro":"2026-03-16","com":"","incobrable":false},{"cli":"INDUSTRIAL DELIGHTS S.A.","fac":"001-001-0000031","saldo":18900.0,"dias":-2,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-01","fvenc":"2026-03-22","mes":"marzo","anio":2026,"cobro":"2026-03-20","com":"","incobrable":false},{"cli":"INDUSTRIAL DELIGHTS S.A.","fac":"001-001-0000032","saldo":15120.0,"dias":-2,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-01","fvenc":"2026-03-22","mes":"marzo","anio":2026,"cobro":"2026-03-20","com":"","incobrable":false},{"cli":"GLORIA SACEI","fac":"001-001-0000026","saldo":13254.24,"dias":11,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-01","fvenc":"2026-03-09","mes":"marzo","anio":2026,"cobro":"2026-03-20","com":"","incobrable":false},{"cli":"GLORIA SACEI","fac":"001-002-0000028","saldo":13267.52,"dias":1,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-01","fvenc":"2026-03-19","mes":"marzo","anio":2026,"cobro":"2026-03-20","com":"","incobrable":false},{"cli":"LESTONSUR S.A.","fac":"001-002-0000173","saldo":46872.0,"dias":2,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-03","fvenc":"2026-03-24","mes":"marzo","anio":2026,"cobro":"2026-03-26","com":"","incobrable":false},{"cli":"COTO C.I.C.S.A.","fac":"001-002-0000126","saldo":52668.0,"dias":0,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-01","fvenc":"2026-03-26","mes":"marzo","anio":2026,"cobro":"2026-03-26","com":"","incobrable":false},{"cli":"GLORIA SACEI","fac":"001-001-0000029","saldo":49262.56,"dias":6,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-01","fvenc":"2026-03-21","mes":"marzo","anio":2026,"cobro":"2026-03-27","com":"","incobrable":false},{"cli":"GLORIA SACEI","fac":"001-001-0000030","saldo":8814.37,"dias":7,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-01","fvenc":"2026-03-21","mes":"marzo","anio":2026,"cobro":"2026-03-28","com":"","incobrable":false},{"cli":"COTO C.I.C.S.A.","fac":"001-001-0000125","saldo":52668.0,"dias":0,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-01","fvenc":"2026-03-27","mes":"marzo","anio":2026,"cobro":"2026-03-27","com":"","incobrable":false},{"cli":"SOCIEDAD ANONIMA IMPORTADORA Y EXPORTADORA DE LA PATAGONIA","fac":"001-002-0000145","saldo":55440.0,"dias":3,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-02","fvenc":"2026-03-27","mes":"marzo","anio":2026,"cobro":"2026-03-30","com":"","incobrable":false},{"cli":"COTO C.I.C.S.A.","fac":"001-002-0000110","saldo":52668.0,"dias":3,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2025-12","fvenc":"2026-03-27","mes":"marzo","anio":2026,"cobro":"2026-03-30","com":"","incobrable":false},{"cli":"DULCIS DENTE SRL","fac":"001-001-0000120","saldo":40320.0,"dias":21,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-01","fvenc":"2026-03-11","mes":"marzo","anio":2026,"cobro":"2026-04-01","com":"","incobrable":false},{"cli":"AUTOSERVICIO MAYORISTA DIARCO S.A.","fac":"001-002-0000141","saldo":54936.0,"dias":5,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-02","fvenc":"2026-03-27","mes":"marzo","anio":2026,"cobro":"2026-04-01","com":"","incobrable":false},{"cli":"DORINKA SRL","fac":"001-002-0000142","saldo":49411.36,"dias":12,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-01","fvenc":"2026-03-26","mes":"marzo","anio":2026,"cobro":"2026-04-07","com":"","incobrable":false},{"cli":"SUPERMERCADOS MAYORISTA MAKRO","fac":"001-002-0000137","saldo":53928.0,"dias":19,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-01","fvenc":"2026-03-22","mes":"marzo","anio":2026,"cobro":"2026-04-10","com":"","incobrable":false},{"cli":"INC S.A.","fac":"001-002-0000135","saldo":53928.0,"dias":16,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-01","fvenc":"2026-03-25","mes":"marzo","anio":2026,"cobro":"2026-04-10","com":"","incobrable":false},{"cli":"INC S.A.","fac":"001-002-0000134","saldo":53928.0,"dias":16,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-01","fvenc":"2026-03-25","mes":"marzo","anio":2026,"cobro":"2026-04-10","com":"","incobrable":false},{"cli":"INDUSTRIAL DELIGHTS S.A.","fac":"001-001-0000033","saldo":9450.0,"dias":13,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-01","fvenc":"2026-03-28","mes":"marzo","anio":2026,"cobro":"2026-04-10","com":"","incobrable":false},{"cli":"INDUSTRIAL DELIGHTS S.A.","fac":"001-001-0000034","saldo":9450.0,"dias":13,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-01","fvenc":"2026-03-28","mes":"marzo","anio":2026,"cobro":"2026-04-10","com":"","incobrable":false},{"cli":"CENCOSUD S.A.","fac":"001-002-0000131","saldo":51408.0,"dias":8,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-01","fvenc":"2026-04-02","mes":"enero","anio":2026,"cobro":"2026-04-10","com":"","incobrable":false},{"cli":"INDUSTRIAL DELIGHTS S.A.","fac":"001-001-0000040","saldo":18900.0,"dias":19,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"29/02/2","fvenc":"2026-03-29","mes":"","anio":2026,"cobro":"2026-04-17","com":"","incobrable":false},{"cli":"DORINKA SRL","fac":"001-002-0000143","saldo":49890.4,"dias":14,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-02","fvenc":"2026-04-03","mes":"febrero","anio":2026,"cobro":"2026-04-17","com":"","incobrable":false},{"cli":"INDUSTRIAL DELIGHTS S.A.","fac":"001-001-0000036","saldo":9450.0,"dias":13,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-02","fvenc":"2026-04-04","mes":"febrero","anio":2026,"cobro":"2026-04-17","com":"","incobrable":false},{"cli":"GP ALIMENTOS S.A.","fac":"001-002-0000146","saldo":51408.0,"dias":27,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-02","fvenc":"2026-04-01","mes":"febrero","anio":2026,"cobro":"2026-04-28","com":"","incobrable":false},{"cli":"MARVI S.A.","fac":"001-001-0000037","saldo":9180.0,"dias":6,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-02","fvenc":"2026-04-28","mes":"febrero","anio":2026,"cobro":"2026-05-04","com":"","incobrable":false},{"cli":"CENCOSUD S.A.","fac":"001-002-0000133","saldo":51408.0,"dias":24,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-01","fvenc":"2026-04-03","mes":"enero","anio":2026,"cobro":"2026-04-27","com":"","incobrable":false},{"cli":"COTO C.I.C.S.A.","fac":"001-002-0000152","saldo":52668.0,"dias":4,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-02","fvenc":"2026-04-23","mes":"febrero","anio":2026,"cobro":"2026-04-27","com":"","incobrable":false},{"cli":"SUPERMERCADOS MAYORISTA MAKRO","fac":"001-002-0000160","saldo":53928.0,"dias":4,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-02","fvenc":"2026-04-25","mes":"febrero","anio":2026,"cobro":"2026-04-29","com":"","incobrable":false},{"cli":"COTO C.I.C.S.A.","fac":"001-002-0000153","saldo":52668.0,"dias":0,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-02","fvenc":"2026-04-30","mes":"febrero","anio":2026,"cobro":"2026-04-30","com":"","incobrable":false},{"cli":"COTO C.I.C.S.A.","fac":"001-002-0000149","saldo":52668.0,"dias":4,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-02","fvenc":"2026-04-30","mes":"febrero","anio":2026,"cobro":"2026-05-04","com":"","incobrable":false},{"cli":"LUVIK S.A.","fac":"001-002-0000148","saldo":47124.0,"dias":35,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-02","fvenc":"2026-04-01","mes":"febrero","anio":2026,"cobro":"2026-05-06","com":"","incobrable":false},{"cli":"SOCIEDAD ANONIMA IMPORTADORA Y EXPORTADORA DE LA PATAGONIA","fac":"001-002-0000165","saldo":55440.0,"dias":1,"estado":"COBRADO","aging":"Cobrado","rating":"COBRADO","f":"2026-03","fvenc":"2026-05-06","mes":"marzo","anio":2026,"cobro":"2026-05-07","com":"","incobrable":false}];
+
+const ESTADO_COL = {"COBRADO":"#9B8870","VENCIDO":"#dc2626","A VENCER":"#8B7355"};
+const AGING_ORDER = ["A Vencer","1-30 días","31-60 días","61-90 días","91-180 días","180+ días","Cobrado"];
+const AGING_COLS = ["#8B7355","#84cc16","#f59e0b","#f97316","#ef4444","#5C3A1A","#9B8870"];
+const RATING_CLASS = {"COBRADO":"b-cobrado","A VENCER":"b-avencer","Riesgo Bajo":"b-bajo","Riesgo Medio":"b-medio","Riesgo Alto":"b-alto","Crítico":"b-critico"};
+const RATING_ICON = {"COBRADO":"","A VENCER":"","Riesgo Bajo":"","Riesgo Medio":"","Riesgo Alto":"","Crítico":""};
+// Clientes declarados incobrables — excluidos del flujo, marcados visualmente
+const isIncobrable = r => r.incobrable === true;
+
+const fmtUSD = n => "$ "+n.toLocaleString('es-PY',{minimumFractionDigits:2,maximumFractionDigits:2});
+const tick = n => n===0?"0":Math.round(n).toLocaleString('es-PY');
+const base = {animation:{duration:300},plugins:{legend:{display:false},tooltip:{padding:10,bodyFont:{size:12}}}};
+
+const st = {estado:"Todos",cli:"Todos",anio:"Todos",mes:"Todos",aging:"Todos"};
+let sortCol="total", sortAsc=false;
+let currentData=[];
+
+// Populate selects
+const clientes=[...new Set(ALL_DATA.map(r=>r.cli).filter(Boolean))].sort();
+const selC=document.getElementById('sel-cli');
+clientes.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c.length>40?c.slice(0,39)+'…':c;selC.appendChild(o);});
+
+function setF(field,btn){
+ st[field]=btn.dataset.val;
+ btn.parentElement.querySelectorAll('.tag').forEach(b=>{b.classList.remove('active');b.style.background='';b.style.color='';});
+ btn.classList.add('active');btn.style.background='#5C4528';btn.style.color='#fff';
+ render();
+}
+function getFilt(){
+ return ALL_DATA.filter(r=>{
+  const ym=getYM(r);
+  return (st.estado==='Todos'||r.estado===st.estado)&&
+  (st.cli==='Todos'||r.cli===st.cli)&&
+  (st.anio==='Todos'||ym.y===st.anio)&&
+  (st.mes==='Todos'||ym.m===st.mes)&&
+  (st.aging==='Todos'||r.aging===st.aging);
+ });
+}
+
+let cDo,cMo,cCl,cAg;
+
+function render(){
+ const d=getFilt();
+ currentData=d;
+ document.getElementById('hdr-count').textContent=d.length;
+
+ const cob = d.filter(r=>r.estado==='COBRADO');
+ const ven = d.filter(r=>r.estado==='VENCIDO');
+ const avc = d.filter(r=>r.estado==='A VENCER');
+ const tTotal = d.reduce((s,r)=>s+r.saldo,0);
+ const tCob = cob.reduce((s,r)=>s+r.saldo,0);
+ const tVen = ven.reduce((s,r)=>s+r.saldo,0);
+ const tAvc = avc.reduce((s,r)=>s+r.saldo,0);
+ const pct = tTotal>0?Math.round(tCob/tTotal*100):0;
+
+ document.getElementById('k-total').textContent = fmtUSD(tTotal);
+ document.getElementById('k-total-s').textContent= d.length+' facturas';
+ document.getElementById('k-cob').textContent = fmtUSD(tCob);
+ document.getElementById('k-cob-s').textContent = cob.length+' facturas';
+ document.getElementById('k-ven').textContent = fmtUSD(tVen);
+ document.getElementById('k-ven-s').textContent = ven.length+' facturas';
+ document.getElementById('k-avc').textContent = fmtUSD(tAvc);
+ document.getElementById('k-avc-s').textContent = avc.length+' facturas';
+ document.getElementById('k-pct').textContent = pct+'%';
+ document.getElementById('k-pct-s').textContent = 'de USD '+tick(tTotal)+' facturado';
+
+ // DONUT estado
+ const donutData=[
+ {l:'Cobrado',v:tCob,c:'#9B8870'},
+ {l:'Vencido',v:tVen,c:'#dc2626'},
+ {l:'A Vencer',v:tAvc,c:'#8B7355'}
+ ].filter(e=>e.v>0);
+ if(cDo)cDo.destroy();
+ cDo=new Chart(document.getElementById('c-donut'),{type:'doughnut',
+ data:{labels:donutData.map(e=>e.l),datasets:[{data:donutData.map(e=>e.v),
+ backgroundColor:donutData.map(e=>e.c),borderWidth:2,borderColor:'#fff',hoverOffset:5}]},
+ options:{animation:{duration:300},cutout:'65%',
+    onHover:(e,els)=>{e.native.target.style.cursor=els.length?'pointer':'default'},
+    onClick:(e,els,ch)=>{if(!els.length)return;const estado=ch.data.labels[els[0].index];const estadoUp=estado.toUpperCase();const items=getFilt().filter(r=>r.estado===estadoUp);const pm={};items.forEach(r=>{pm[r.cli]=(pm[r.cli]||0)+r.saldo;});const rows=Object.entries(pm).sort((a,b)=>b[1]-a[1]).map(([c,m])=>({label:c,val:fmtUSD(m)}));const tot=items.reduce((s,r)=>s+r.saldo,0);showDetailModal(estado,rows.length+' clientes · '+fmtUSD(tot),rows);},
+    plugins:{legend:{display:false},
+ tooltip:{callbacks:{label:ctx=>' '+ctx.label+': '+fmtUSD(ctx.raw)+' ('+Math.round(ctx.raw/tTotal*100)+'%)'}}}}
+ });
+ document.getElementById('donut-leg').innerHTML=donutData.map(e=>`
+ <div style="display:flex;align-items:center;gap:8px">
+ <span style="width:11px;height:11px;border-radius:50%;background:${e.c};display:inline-block;flex-shrink:0"></span>
+ <div><div style="font-weight:600;color:#3D3020">${e.l}</div>
+ <div style="color:#A09080;font-size:11px">${fmtUSD(e.v)} · ${Math.round(e.v/tTotal*100)}%</div></div>
+ </div>`).join('');
+
+ // MONTHLY
+ const mm={};
+ d.forEach(r=>{
+   // Agrupar por fecha de VENCIMIENTO. Sin fvenc → excluir (no hay mes asignable)
+   if(!r.fvenc || r.fvenc.length<7) return;
+   const key = r.fvenc.slice(0,7);
+   if(!mm[key]) mm[key]={cob:0,ven:0,avc:0};
+   mm[key][r.estado==='COBRADO'?'cob':r.estado==='VENCIDO'?'ven':'avc']+=r.saldo;
+ });
+ const mk=Object.keys(mm).sort();
+ if(cMo)cMo.destroy();
+ cMo=new Chart(document.getElementById('c-monthly'),{type:'bar',
+ data:{labels:mk.map(k=>k.slice(5)+'/'+k.slice(2,4)),datasets:[
+ {label:'Cobrado', data:mk.map(k=>mm[k].cob),backgroundColor:'#9B8870',stack:'s',borderRadius:0},
+ {label:'Vencido', data:mk.map(k=>mm[k].ven),backgroundColor:'#8B3A2A',stack:'s',borderRadius:0},
+ {label:'A Vencer', data:mk.map(k=>mm[k].avc),backgroundColor:'#8B7355',stack:'s',borderRadius:[3,3,0,0]}
+ ]},
+ options:{...base,
+    onHover:(e,els)=>{e.native.target.style.cursor=els.length?'pointer':'default'},
+    onClick:(e,els,ch)=>{if(!els.length)return;const lbl=ch.data.labels[els[0].index];const items=getFilt().filter(r=>r.f&&(r.f.slice(5)+'/'+r.f.slice(2,4))===lbl);const pm={};items.forEach(r=>{pm[r.cli]=(pm[r.cli]||0)+r.saldo;});const rows=Object.entries(pm).sort((a,b)=>b[1]-a[1]).map(([c,m])=>({label:c,val:fmtUSD(m)}));showDetailModal('Período '+lbl,rows.length+' clientes',rows);},
+    plugins:{...base.plugins,legend:{display:true,labels:{font:{size:11},boxWidth:11}}},
+ scales:{x:{stacked:true,ticks:{font:{size:9.5},maxRotation:40,color:'#7A6A58'},grid:{color:'#F5F0EA'}},
+ y:{stacked:true,ticks:{font:{size:9},color:'#7A6A58',callback:tick},grid:{color:'#F5F0EA'}}}}
+ });
+
+ // CLIENTES horizontal bar
+ const cm={};
+ d.forEach(r=>{if(!cm[r.cli])cm[r.cli]=0;cm[r.cli]+=r.saldo;});
+ const cr=Object.entries(cm).sort((a,b)=>b[1]-a[1]).reverse();
+ window._cliNames=cr.map(e=>e[0]);
+ if(cCl)cCl.destroy();
+ cCl=new Chart(document.getElementById('c-clientes'),{type:'bar',
+ data:{labels:cr.map(e=>e[0].length>35?e[0].slice(0,34)+'…':e[0]),
+ datasets:[{label:'Saldo USD',data:cr.map(e=>e[1]),
+ backgroundColor:cr.map((_,i)=>i>=cr.length-3?'#5C4528':i>=cr.length-6?'#8B7355':'#9B8870'),borderRadius:3}]},
+ options:{...base,indexAxis:'y',
+    onHover:(e,els)=>{e.native.target.style.cursor=els.length?'pointer':'default'},
+    onClick:(e,els,ch)=>{if(!els.length)return;const lbl=ch.data.labels[els[0].index];const cli=(window._cliNames||[])[els[0].index]||lbl.replace('…','');showClientDetail(cli);},
+    scales:{x:{ticks:{font:{size:9.5},color:'#7A6A58',callback:tick},grid:{color:'#F5F0EA'}},
+    y:{ticks:{font:{size:9.5},color:'#3D3020'},grid:{display:false}}}}
+ });
+
+ // AGING
+ const am={};AGING_ORDER.forEach(a=>am[a]={m:0,c:0});
+ d.forEach(r=>{if(am[r.aging]){am[r.aging].m+=r.saldo;am[r.aging].c++;}});
+ const ar=AGING_ORDER.map(a=>{return{b:a,...am[a]}});
+ if(cAg)cAg.destroy();
+ cAg=new Chart(document.getElementById('c-aging'),{type:'bar',
+ data:{labels:AGING_ORDER,datasets:[{label:'Saldo USD',data:ar.map(r=>r.m),backgroundColor:AGING_COLS,borderRadius:5}]},
+ options:{...base,
+    onHover:(e,els)=>{e.native.target.style.cursor=els.length?'pointer':'default'},
+    onClick:(e,els,ch)=>{if(!els.length)return;const bucket=ch.data.labels[els[0].index];const items=getFilt().filter(r=>r.aging===bucket);const pm={};items.forEach(r=>{pm[r.cli]=(pm[r.cli]||0)+r.saldo;});const rows=Object.entries(pm).sort((a,b)=>b[1]-a[1]).map(([c,m])=>({label:c,val:fmtUSD(m)}));const tot=items.reduce((s,r)=>s+r.saldo,0);showDetailModal(bucket,rows.length+' clientes · '+fmtUSD(tot),rows);},
+    scales:{x:{ticks:{font:{size:9.5},color:'#7A6A58'},grid:{color:'#F5F0EA'}},
+    y:{ticks:{font:{size:9},color:'#7A6A58',callback:tick},grid:{color:'#F5F0EA'}}}}
+ });
+
+ // CLIENT STATUS TABLE
+ renderCliTable(d);
+ // DELAY RANKING
+ renderDelayRanking(d);
+}
+
+
+function renderCliTable(d){
+ const cm={};
+ d.forEach(r=>{
+  if(!cm[r.cli])cm[r.cli]={cli:r.cli,fac:0,total:0,vencido:0,avencer:0,cobrado:0,dias:[],coms:[],ratings:[]};
+  cm[r.cli].fac++;cm[r.cli].total+=r.saldo;
+  if(r.estado==='VENCIDO')cm[r.cli].vencido+=r.saldo;
+  if(r.estado==='A VENCER')cm[r.cli].avencer+=r.saldo;
+  if(r.estado==='COBRADO')cm[r.cli].cobrado+=r.saldo;
+  if(r.dias>0)cm[r.cli].dias.push(r.dias);
+  if(r.com)cm[r.cli].coms.push(r.com);
+  cm[r.cli].ratings.push(r.rating);
+ });
+ const RATING_ORD={"Crítico":0,"Riesgo Alto":1,"Riesgo Medio":2,"Riesgo Bajo":3,"A VENCER":4,"COBRADO":5};
+ let rows=Object.values(cm).map(c=>{
+  const worstR=c.ratings.sort((a,b)=>(RATING_ORD[a]??9)-(RATING_ORD[b]??9))[0];
+  const diasProm=c.dias.length?Math.round(c.dias.reduce((s,v)=>s+v,0)/c.dias.length):0;
+  const lastCom=[...new Set(c.coms)].filter(Boolean).slice(-1)[0]||'—';
+  return{...c,rating:worstR,diasProm,lastCom};
+ });
+ rows.sort((a,b)=>{
+  const av=a[sortCol]??0,bv=b[sortCol]??0;
+  if(typeof av==='string')return sortAsc?av.localeCompare(bv):bv.localeCompare(av);
+  return sortAsc?av-bv:bv-av;
+ });
+ // determinar si alguna factura del cliente es incobrable
+ const incobrableCliSet = new Set(ALL_DATA.filter(isIncobrable).map(x=>x.cli));
+ document.getElementById('cli-body').innerHTML=rows.map(r=>{
+  const inc = incobrableCliSet.has(r.cli);
+  const rowBg = inc ? 'background:#F7F5F2;' : '';
+  const cliCell = inc
+   ? `<span style="max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;vertical-align:middle">${r.cli}</span>
+      <span style="background:#6B7280;color:#fff;border-radius:4px;font-size:9px;padding:1px 6px;font-weight:700;margin-left:6px;vertical-align:middle;white-space:nowrap">INCOBRABLE</span>`
+   : `<span style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block">${r.cli}</span>`;
+  return `<tr style="cursor:pointer;${rowBg}${inc?'color:#9CA3AF;':''}" onclick="showClientDetail('${r.cli.replace(/'/g,"\\'")}')">
+  <td style="font-weight:600">${cliCell}</td>
+  <td class="r">${r.fac}</td>
+  <td class="r" style="font-weight:700${inc?';text-decoration:line-through;':''}">${fmtUSD(r.total)}</td>
+  <td class="r" style="color:${inc?'#9CA3AF':'#dc2626'};font-weight:${r.vencido>0?700:400}">${fmtUSD(r.vencido)}</td>
+  <td class="r" style="color:${inc?'#9CA3AF':'#8B7355'}">${fmtUSD(r.avencer)}</td>
+  <td class="r" style="color:${inc?'#9CA3AF':'#3d7a3d'}">${fmtUSD(r.cobrado)}</td>
+  <td class="r">${r.diasProm>0?r.diasProm+' días':'—'}</td>
+  <td>${inc?'<span style="background:#6B7280;color:#fff;border-radius:4px;font-size:9px;padding:2px 7px;font-weight:700">INCOBRABLE</span>':`<span class="${RATING_CLASS[r.rating]||''}">${RATING_ICON[r.rating]||''} ${r.rating}</span>`}</td>
+  </tr>`;
+ }).join('');
+}
+
+function renderDelayRanking(d){
+ // Include both VENCIDO (current overdue) and COBRADO (paid late history) with dias > 0
+ const withDelay=d.filter(r=>(r.estado==='VENCIDO'||r.estado==='COBRADO')&&r.dias>0);
+ const cm={};
+ withDelay.forEach(r=>{
+  if(!cm[r.cli])cm[r.cli]={cli:r.cli,totalVenc:0,diasVenc:[],countVenc:0,diasCob:[],countCob:0};
+  if(r.estado==='VENCIDO'){cm[r.cli].totalVenc+=r.saldo;cm[r.cli].diasVenc.push(r.dias);cm[r.cli].countVenc++;}
+  else{cm[r.cli].diasCob.push(r.dias);cm[r.cli].countCob++;}
+ });
+ const rows=Object.values(cm).map(c=>{
+  const allDias=[...c.diasVenc,...c.diasCob];
+  const avgTotal=Math.round(allDias.reduce((s,v)=>s+v,0)/allDias.length);
+  const avgVenc=c.diasVenc.length?Math.round(c.diasVenc.reduce((s,v)=>s+v,0)/c.diasVenc.length):null;
+  const avgCob=c.diasCob.length?Math.round(c.diasCob.reduce((s,v)=>s+v,0)/c.diasCob.length):null;
+  return{...c,avgTotal,avgVenc,avgCob};
+ }).sort((a,b)=>b.avgTotal-a.avgTotal).slice(0,10);
+ document.getElementById('delay-ranking-body').innerHTML=rows.length?rows.map((r,i)=>`
+  <tr>
+   <td style="padding:8px 12px;color:#A09080;font-weight:700;font-size:11px">${i+1}</td>
+   <td style="padding:8px 12px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;color:#3D3020">${r.cli}</td>
+   <td style="padding:8px 12px;text-align:right;font-weight:700;color:${r.avgTotal>=30?'#dc2626':r.avgTotal>=15?'#f97316':'#3D3020'}">${r.avgTotal} días</td>
+   <td style="padding:8px 12px;text-align:right;font-size:11px;white-space:nowrap">
+    ${r.avgVenc!=null?`<span style="color:#dc2626;font-weight:700">${r.avgVenc}d</span>`:'—'}
+    &nbsp;·&nbsp;
+    ${r.avgCob!=null?`<span style="color:#9B8870;font-weight:600">${r.avgCob}d</span>`:'—'}
+   </td>
+   <td style="padding:8px 12px;text-align:right;font-size:11px;color:#3D3020">
+    ${r.countVenc>0?`<span style="color:#dc2626">${r.countVenc}V</span>`:''} ${r.countCob>0?`<span style="color:#9B8870">${r.countCob}C</span>`:''}
+   </td>
+   <td style="padding:8px 12px;text-align:right;font-weight:700;color:#dc2626">${r.totalVenc>0?fmtUSD(r.totalVenc):'—'}</td>
+  </tr>`).join(''):'<tr><td colspan="6" style="text-align:center;color:#A09080;padding:16px">Sin datos de atraso</td></tr>';
+}
+
+function showClientDetail(cli){
+ const records=ALL_DATA.filter(r=>r.cli===cli);
+ const clienteIncobrable = records.some(isIncobrable);
+ document.getElementById('modal-title').textContent=cli;
+ const tot=records.reduce((s,r)=>s+r.saldo,0);
+ const ven=records.filter(r=>r.estado==='VENCIDO').reduce((s,r)=>s+r.saldo,0);
+ const subBase = records.length+' facturas · '+fmtUSD(tot)+' · Vencido: '+fmtUSD(ven);
+ document.getElementById('modal-sub').textContent = clienteIncobrable
+   ? subBase + ' · ⚠ Excluido del flujo de caja (INCOBRABLE)'
+   : subBase;
+ document.getElementById('modal-body').innerHTML=records.sort((a,b)=>b.dias-a.dias).map(r=>`
+  <div style="padding:9px 0;border-bottom:1px solid #F0EBE3">
+   <div style="display:flex;justify-content:space-between;align-items:center">
+    <span style="font-weight:600;font-size:12px">${r.fac}</span>
+    <span style="font-weight:700;color:#5C4528">${fmtUSD(r.saldo)}</span>
+   </div>
+   <div style="display:flex;gap:10px;font-size:11px;color:#7A6A58;margin-top:3px;flex-wrap:wrap">
+    <span class="${RATING_CLASS[r.rating]||''}">${r.estado}</span>
+    ${r.dias>0?`<span>${r.dias} días atrasado</span>`:''}
+    <span>${r.aging}</span>
+    ${r.cobro&&r.cobro!=='PENDIENTE'?`<span>Cobrado: ${r.cobro}</span>`:''}
+   </div>
+   ${r.com?`<div style="font-size:11px;color:#7A6A58;margin-top:3px;font-style:italic">${r.com}</div>`:''}
+  </div>`).join('');
+ document.getElementById('modal-footer').innerHTML=`<button onclick="closeDetailModal()" style="padding:7px 18px;background:#5C4528;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px">Cerrar</button>`;
+ document.getElementById('modal-overlay').classList.add('open');
+}
+
+
+function showDetailModal(title, sub, rows){
+  document.getElementById('modal-title').textContent=title;
+  document.getElementById('modal-sub').textContent=sub;
+  document.getElementById('modal-body').innerHTML=rows.length
+    ?'<table style="width:100%;border-collapse:collapse;font-size:12px">'
+     +'<thead><tr><th style="text-align:left;padding:8px 4px;color:#A09080;font-weight:600;border-bottom:1px solid #E5DDD0">Descripción</th>'
+     +'<th style="text-align:right;padding:8px 4px;color:#A09080;font-weight:600;border-bottom:1px solid #E5DDD0">Saldo USD</th></tr></thead>'
+     +'<tbody>'+rows.map(r=>'<tr><td style="padding:7px 4px;color:#3D2A18;border-bottom:1px solid #F5F0EA;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+r.label+'</td>'
+     +'<td style="padding:7px 4px;text-align:right;font-weight:700;color:#5C4528;border-bottom:1px solid #F5F0EA">'+r.val+'</td></tr>').join('')
+     +'</tbody></table>'
+    :'<div style="color:#A09080;text-align:center;padding:24px">Sin datos</div>';
+  document.getElementById('modal-footer').innerHTML='<button onclick="closeDetailModal()" style="padding:7px 20px;background:#5C4528;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600">Cerrar</button>';
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeDetailModal(){document.getElementById('modal-overlay').classList.remove('open');}
+function closeModal(e){if(e.target===e.currentTarget)closeDetailModal();}
+
+
+function sortTable(col){
+ if(sortCol===col){sortAsc=!sortAsc;}else{sortCol=col;sortAsc=false;}
+ renderCliTable(currentData);
+}
+
+document.getElementById('sel-cli').addEventListener('change',function(){st.cli=this.value;render();});
+document.getElementById('sel-anio').addEventListener('change',function(){
+  st.anio=this.value;st.mes='Todos';selMes.value='Todos';
+  populateMesesCli(this.value);render();
+});
+document.getElementById('sel-mes').addEventListener('change',function(){st.mes=this.value;render();});
+document.getElementById('sel-aging').addEventListener('change',function(){st.aging=this.value;render();});
+
+// ── Nombres de mes completos ───────────────────────────────────────────
+const MES_NOM_FULL={"01":"Enero","02":"Febrero","03":"Marzo","04":"Abril","05":"Mayo","06":"Junio","07":"Julio","08":"Agosto","09":"Septiembre","10":"Octubre","11":"Noviembre","12":"Diciembre"};
+
+// ── Para c/registro: cobrados usan fecha de cobro, el resto fecha de vcto ──
+function getYM(r){
+  if(r.estado==='COBRADO'&&r.cobro&&r.cobro!=='PENDIENTE'&&r.cobro.length>=7)
+    return {y:r.cobro.slice(0,4), m:r.cobro.slice(5,7)};
+  return {y:r.f?r.f.slice(0,4):String(r.anio), m:r.f&&r.f.length>=7?r.f.slice(5,7):null};
+}
+
+// ── Año ────────────────────────────────────────────────────────────────
+const ALL_ANIOS_CLI=[...new Set(ALL_DATA.map(r=>getYM(r).y).filter(Boolean))].sort();
+const selAnio=document.getElementById('sel-anio');
+function populateAniosCli(){
+  while(selAnio.options.length>1)selAnio.remove(1);
+  ALL_ANIOS_CLI.forEach(a=>{const o=document.createElement('option');o.value=a;o.textContent=a;selAnio.appendChild(o);});
+}
+
+// ── Mes (solo los que existen en ese año) ──────────────────────────────
+const selMes=document.getElementById('sel-mes');
+function populateMesesCli(anio){
+  while(selMes.options.length>1)selMes.remove(1);
+  const mms=[...new Set(ALL_DATA.map(r=>{const ym=getYM(r);return (anio==='Todos'||ym.y===anio)?ym.m:null;}).filter(Boolean))].sort();
+  mms.forEach(mm=>{const o=document.createElement('option');o.value=mm;o.textContent=MES_NOM_FULL[mm]||mm;selMes.appendChild(o);});
+}
+
+// ── Antigüedad (dinámico, sin duplicados) ──────────────────────────────
+const agingOrder=["A Vencer","1-30 días","31-60 días","61-90 días","91-180 días","180+ días","Cobrado"];
+const agingOpts=[...new Set(ALL_DATA.map(r=>r.aging).filter(Boolean))];
+agingOpts.sort((a,b)=>agingOrder.indexOf(a)-agingOrder.indexOf(b));
+const selAging=document.getElementById('sel-aging');
+agingOpts.forEach(a=>{const o=document.createElement('option');o.value=a;o.textContent=a;selAging.appendChild(o);});
+
+populateAniosCli();
+populateMesesCli('Todos');
+
+render();
+
+function toggleNav(){
+  const m=document.getElementById('nav-mobile');
+  m.classList.toggle('open');
+}
+document.querySelectorAll('.nav-mobile a').forEach(a=>{
+  a.addEventListener('click',()=>document.getElementById('nav-mobile').classList.remove('open'));
+});
+</script>
+</body>
+</html>
