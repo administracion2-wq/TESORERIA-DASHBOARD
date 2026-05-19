@@ -1,0 +1,600 @@
+﻿<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Resumen Ejecutivo — CMA Paraguay S.A.</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:#F5F0EA;color:#3D2A18;min-height:100vh}
+a{text-decoration:none;transition:all .15s}
+.card{background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid #E5DDD0;padding:18px 20px}
+.container{max-width:1300px;margin:0 auto;padding:20px 26px;display:flex;flex-direction:column;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.kpi-big{border-radius:12px;padding:14px 16px;background:#fff;border:1px solid #E5DDD0;box-shadow:0 1px 4px rgba(0,0,0,.06);display:flex;flex-direction:column;gap:3px;position:relative;overflow:hidden;text-decoration:none;transition:transform .15s,box-shadow .15s;color:#3D2A18}
+.kpi-big:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,.1)}
+.kpi-big .eyebrow{font-size:9.5px;font-weight:500;color:#A09080;text-transform:uppercase;letter-spacing:.09em}
+.kpi-big .title{font-size:13px;font-weight:600;color:#3D2A18}
+.kpi-big .amount{font-size:22px;font-weight:600;line-height:1.1;margin-top:4px}
+.kpi-big .sub{font-size:10.5px;color:#A09080;margin-top:1px}
+.kpi-big .tag{position:absolute;top:14px;right:16px;font-size:22px;opacity:.08}
+.kpi-big .badge-alert{display:inline-flex;align-items:center;gap:4px;background:#F5F0EA;border-radius:999px;padding:2px 9px;font-size:10px;font-weight:500;margin-top:4px;width:fit-content;color:#5C4528}
+.section-title{font-size:13px;font-weight:600;color:#3D3020;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.tc-bar{background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid #E5DDD0;padding:12px 20px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.tc-label{font-size:10px;font-weight:500;color:#A09080;text-transform:uppercase;letter-spacing:.07em}
+input[type=number]{font-family:inherit;font-size:13px;font-weight:700;border:1.5px solid #D5C8B5;border-radius:8px;padding:5px 10px;width:130px;color:#5C4528;outline:none}
+input[type=number]:focus{border-color:#5C4528}
+.net-bar{border-radius:12px;padding:18px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;background:#fff;border:1px solid #E5DDD0;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.net-item{text-align:center}
+.net-label{font-size:10px;font-weight:500;color:#A09080;text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}
+.net-val{font-size:20px;font-weight:600;color:#3D2A18}
+.net-divider{font-size:28px;color:#D5C8B5;font-weight:300}
+.alert-row{display:flex;flex-direction:column;gap:6px}
+.alert-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:8px;background:#F5F0EA;border:1px solid #E5DDD0;font-size:12px}
+.alert-item .cli{font-weight:600;color:#3D3020;flex:1;margin-right:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.alert-item .amt{font-weight:700;font-family:monospace;white-space:nowrap}
+.eff-bar{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.eff-card{background:#fff;border-radius:12px;border:1px solid #E5DDD0;padding:16px 22px;display:flex;align-items:center;gap:20px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.eff-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.eff-label{font-size:10px;font-weight:500;color:#A09080;text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px}
+.eff-val{font-size:22px;font-weight:600;color:#3D2A18;line-height:1.1}
+.eff-sub{font-size:10.5px;color:#A09080;margin-top:2px}
+footer{text-align:center;font-size:11px;color:#A09080;padding:10px 0 20px}
+/* ── NAV HAMBURGER ── */
+.nav-links{display:flex;align-items:center;gap:2px}
+.nav-hamburger{display:none;background:none;border:none;cursor:pointer;padding:10px;color:#fff;font-size:22px;margin-left:auto}
+.nav-mobile{display:none;flex-direction:column;background:#4A3620;border-top:1px solid rgba(255,255,255,.1)}
+.nav-mobile.open{display:flex}
+.nav-mobile a{padding:13px 22px;font-size:13px;font-weight:600;color:rgba(255,255,255,.8);border-bottom:1px solid rgba(255,255,255,.07);text-decoration:none}
+.nav-mobile a:hover{background:rgba(255,255,255,.08);color:#fff}
+.nav-mobile a.active{color:#D4B86A;background:rgba(255,255,255,.06)}
+
+@media(max-width:960px){
+  .grid3{grid-template-columns:1fr}
+  .grid2{grid-template-columns:1fr}
+  .eff-bar{grid-template-columns:1fr}
+}
+
+@media(max-width:768px){
+  /* Nav */
+  .nav-links{display:none}
+  .nav-hamburger{display:block}
+
+  /* Container */
+  .container{padding:12px 14px;gap:12px}
+
+  /* Header */
+  .header-bar{padding:14px 16px !important}
+  .header-bar .title-text{font-size:17px !important}
+  .header-bar .subtitle-text{font-size:10px !important}
+
+  /* TC bar */
+  .tc-bar{flex-direction:column;align-items:flex-start;gap:10px;padding:14px 16px}
+  .tc-bar input[type=number]{width:100%}
+  .tc-bar .tc-right{margin-left:0 !important;text-align:left !important;width:100%}
+  .tc-bar .tc-right div:last-child{font-size:18px !important}
+
+  /* KPI cards */
+  .kpi-big{padding:16px}
+  .kpi-big .amount{font-size:22px}
+
+  /* Net bar */
+  .net-bar{flex-direction:column;align-items:flex-start;padding:14px 16px;gap:12px}
+  .net-item{width:100%;display:flex;justify-content:space-between;align-items:center}
+  .net-label{margin-bottom:0;margin-right:10px}
+  .net-val{font-size:18px}
+  .net-divider{display:none}
+
+  /* Cards */
+  .card{padding:14px 14px}
+  .section-title{font-size:12px;margin-bottom:10px}
+
+  /* Gráficos — altura reducida en móvil */
+  canvas{max-height:200px}
+  #c-evol{max-height:150px}
+
+  /* Eff cards */
+  .eff-card{padding:14px 16px;gap:14px}
+  .eff-icon{width:38px;height:38px;font-size:17px}
+  .eff-val{font-size:19px}
+
+  /* Alert items */
+  .alert-item{padding:8px 10px}
+  .alert-item .cli{font-size:11px}
+  .alert-item .amt{font-size:11px}
+
+  /* Modal full screen en móvil */
+  #modal-overlay > div{width:100% !important;max-width:100% !important;height:100% !important;max-height:100% !important;border-radius:0 !important}
+}
+</style>
+</head><body>
+<nav style="background:#5C4528;border-bottom:1px solid rgba(255,255,255,.1)">
+ <div style="padding:0 22px;display:flex;align-items:center">
+  <span style="font-size:11px;font-weight:500;color:#fff;text-transform:uppercase;letter-spacing:.09em;padding:11px 0;margin-right:16px;flex-shrink:0">CMA Paraguay S.A.</span>
+  <div class="nav-links">
+   <a href="Dashboard_Resumen.html" style="padding:9px 14px;border-radius:6px 6px 0 0;font-size:12px;font-weight:600;background:rgba(255,255,255,.18);color:#fff;text-decoration:none">🏠 Resumen</a>
+   <a href="Dashboard_Operaciones.html" style="padding:9px 14px;border-radius:6px 6px 0 0;font-size:12px;font-weight:600;color:rgba(255,255,255,.6);text-decoration:none">C. a Pagar</a>
+   <a href="Dashboard_Bancos.html" style="padding:9px 14px;border-radius:6px 6px 0 0;font-size:12px;font-weight:600;color:rgba(255,255,255,.6);text-decoration:none">Financiam.</a>
+   <a href="Dashboard_Clientes.html" style="padding:9px 14px;border-radius:6px 6px 0 0;font-size:12px;font-weight:600;color:rgba(255,255,255,.6);text-decoration:none">Clientes</a>
+   <a href="Dashboard_Flujo.html" style="padding:9px 14px;border-radius:6px 6px 0 0;font-size:12px;font-weight:600;color:rgba(255,255,255,.6);text-decoration:none">Flujo de Caja</a>
+  </div>
+  <button class="nav-hamburger" onclick="toggleNav()" aria-label="Menú">☰</button>
+ </div>
+ <div class="nav-mobile" id="nav-mobile">
+  <a href="Dashboard_Resumen.html" class="active">🏠 Resumen Ejecutivo</a>
+  <a href="Dashboard_Operaciones.html">Cuentas a Pagar</a>
+  <a href="Dashboard_Bancos.html">Financiamiento</a>
+  <a href="Dashboard_Clientes.html">Cuentas por Cobrar</a>
+  <a href="Dashboard_Flujo.html">Flujo de Caja</a>
+ </div>
+</nav>
+
+<div class="header-bar" style="background:linear-gradient(135deg,#5C4528 0%,#8B7355 100%);padding:16px 26px;display:flex;align-items:center;justify-content:space-between">
+ <div>
+ <div style="font-size:10px;font-weight:500;color:#fff;text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px">CMA Paraguay S.A.</div>
+ <div class="title-text" style="font-size:21px;font-weight:600;color:#fff;letter-spacing:-.3px">Resumen Ejecutivo</div>
+ <div style="font-size:11px;color:rgba(255,255,255,.7);margin-top:2px">Consolidado Cuentas por Cobrar · Pagar · Financiamiento — 12/05/2026</div>
+ </div>
+</div>
+
+<div class="container">
+
+ <!-- TIPO DE CAMBIO -->
+ <div class="tc-bar">
+ <div>
+  <div class="tc-label">Tipo de Cambio (₲ / USD)</div>
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+   <input type="number" id="tc-input" value="7600" min="1" step="50" onchange="tc=+this.value;updateAll()"/>
+   <button id="tc-refresh" onclick="fetchTCDNIT()" title="Obtener tipo de cambio DNIT"
+    style="border:none;background:#F5F0EA;border-radius:7px;padding:5px 11px;font-size:11px;font-weight:600;color:#5C4528;cursor:pointer;display:flex;align-items:center;gap:4px">
+    ↻ DNIT
+   </button>
+  </div>
+  <div id="tc-source" style="font-size:10.5px;color:#A09080;margin-top:4px">Cargando tipo de cambio DNIT…</div>
+ </div>
+ <div style="font-size:11.5px;color:#7A6A58">Todos los montos en GS se convierten a USD para el consolidado.</div>
+ <div class="tc-right" style="margin-left:auto;text-align:right">
+ <div style="font-size:10px;font-weight:500;color:#A09080;text-transform:uppercase;letter-spacing:.07em">Cobertura de Pagos</div>
+ <div style="font-size:22px;font-weight:600" id="total-consolidado">—</div>
+ <div style="font-size:10px;color:#A09080;margin-top:2px" id="cobertura-sub">Cobros ÷ Pagos totales</div>
+ </div>
+ </div>
+
+ <!-- 3 BIG KPI CARDS -->
+ <div class="grid3">
+ <a href="Dashboard_Clientes.html" class="kpi-big" style="border-left:4px solid #8B7355">
+ <div class="eyebrow">Cuentas por Cobrar</div>
+ <div class="title">Saldo de Clientes</div>
+ <div class="amount" id="ar-total" style="color:#5C4528">—</div>
+ <div class="sub" id="ar-sub"></div>
+ <div class="badge-alert" id="ar-alert"></div>
+ </a>
+ <a href="Dashboard_Operaciones.html" class="kpi-big" style="border-left:4px solid #5C4528">
+ <div class="eyebrow">Cuentas a Pagar</div>
+ <div class="title">Saldo con Proveedores</div>
+ <div class="amount" id="ap-total" style="color:#5C4528">—</div>
+ <div class="sub" id="ap-sub"></div>
+ <div class="badge-alert" id="ap-alert"></div>
+ </a>
+ <a href="Dashboard_Bancos.html" class="kpi-big" style="border-left:4px solid #C4B08A">
+ <div class="eyebrow">Deuda Bancaria</div>
+ <div class="title">Obligaciones Bancarias</div>
+ <div class="amount" id="fin-total" style="color:#5C4528">—</div>
+ <div class="sub" id="fin-sub"></div>
+ <div class="badge-alert" id="fin-alert"></div>
+ </a>
+ </div>
+
+ <!-- POSICIÓN NETA -->
+ <div class="net-bar">
+ <div class="net-item">
+ <div class="net-label">Por Cobrar (pendiente)</div>
+ <div class="net-val" id="net-cobrar">—</div>
+ <div style="font-size:10px;color:#A09080" id="net-cobrar-s"></div>
+ </div>
+ <div class="net-divider">−</div>
+ <div class="net-item">
+ <div class="net-label">Por Pagar (total)</div>
+ <div class="net-val" id="net-pagar">—</div>
+ <div style="font-size:10px;color:#A09080" id="net-pagar-s"></div>
+ </div>
+ <div class="net-divider">=</div>
+ <div class="net-item">
+ <div class="net-label">Posición Neta</div>
+ <div class="net-val" id="net-pos">—</div>
+ <div style="font-size:10px;color:#A09080" id="net-pos-s"></div>
+ </div>
+ </div>
+
+ <!-- CHARTS ROW -->
+ <div class="grid3">
+ <div class="card">
+ <div class="section-title">Cuentas por Cobrar</div>
+ <canvas id="c-ar-donut" height="190"></canvas>
+ <div id="ar-donut-leg" style="display:flex;flex-direction:column;gap:7px;margin-top:12px;font-size:11.5px"></div>
+ </div>
+ <div class="card">
+ <div class="section-title">Cuentas por Pagar</div>
+ <canvas id="c-ap-aging" height="190"></canvas>
+ </div>
+ <div class="card">
+ <div class="section-title">Deuda Bancaria</div>
+ <canvas id="c-fin-pie" height="190"></canvas>
+ <div id="fin-pie-leg" style="display:flex;flex-direction:column;gap:7px;margin-top:12px;font-size:11.5px"></div>
+ </div>
+ </div>
+
+ <!-- DPO / DSO -->
+ <div class="eff-bar">
+ <div class="eff-card">
+ <div class="eff-icon" style="background:#F5F0EA">📤</div>
+ <div>
+ <div class="eff-label">DPO — Días de Pago a Proveedores</div>
+ <div class="eff-val" id="dpo-val">—</div>
+ <div class="eff-sub">días promedio ponderado · facturas vencidas</div>
+ </div>
+ </div>
+ <div class="eff-card">
+ <div class="eff-icon" style="background:#F5F0EA">📥</div>
+ <div>
+ <div class="eff-label">DSO — Días de Cobro a Clientes</div>
+ <div class="eff-val" id="dso-val">—</div>
+ <div class="eff-sub">días promedio ponderado · facturas vencidas</div>
+ </div>
+ </div>
+ </div>
+
+ <!-- ALERTAS -->
+ <div class="grid2">
+ <div class="card">
+ <div class="section-title">Clientes con Mayor Saldo Vencido</div>
+ <div class="alert-row" id="ar-alerts"></div>
+ </div>
+ <div class="card">
+ <div class="section-title">Facturación Cobrada por Cliente</div>
+ <div class="alert-row" id="ar-top-alerts"></div>
+ </div>
+ </div>
+
+ <!-- EVOLUCIÓN DE LA DEUDA -->
+ <div class="card">
+ <div class="section-title">Evolución de la Deuda — Histórico de Actualizaciones</div>
+ <div id="evol-empty" style="display:none;text-align:center;padding:30px 0;color:#A09080;font-size:12px">
+ Aún no hay suficiente historial. Actualizá el dashboard semanalmente para ver la curva de evolución.
+ </div>
+ <canvas id="c-evol" height="110"></canvas>
+ <div style="display:flex;flex-wrap:wrap;gap:20px;margin-top:12px;font-size:11px" id="evol-leg"></div>
+ </div>
+
+ <footer>CMA Paraguay S.A. · Resumen Ejecutivo · Datos SAP · Última actualización 12/05/2026</footer>
+</div>
+
+<script>
+const D={"ap":{"gs":3150345949.0,"usd":1033110.9669999992,"n":918,"venc_gs":2436344792.0,"venc_usd":696845.6919999997,"n_venc":508,"xvenc_gs":714001157.0,"xvenc_usd":336265.27499999985,"aging_gs":{"Por vencer":714001157.0,"1-30 días":442519851.0,"31-60 días":132150411.0,"61-90 días":114504154.0,"91-180 días":696689312.0,"180+ días":1050481064.0},"aging_usd":{"Por vencer":336265.27499999985,"1-30 días":167503.983,"31-60 días":83206.213,"61-90 días":61519.67599999999,"91-180 días":73730.21999999999,"180+ días":310885.60000000003},"dpo":162},"fin":{"gs":363955.0,"usd":2292927.2400000007,"n":91,"venc_gs":363955.0,"venc_usd":2400.21,"n_venc":3,"xvenc_gs":0,"xvenc_usd":2290527.0300000007,"aging_gs":{"Por vencer":0,"1-30 días":354055.0,"31-60 días":0,"61-90 días":0,"91-180 días":9900.0,"180+ días":0},"aging_usd":{"Por vencer":2290527.0300000007,"1-30 días":2400.21,"31-60 días":0,"61-90 días":0,"91-180 días":0,"180+ días":0},"bancos":{"BANCARD S.A.":0,"BANCO DE LA NACION ARGENTINA":715779.46,"BANCO ITAU PARAGUAY S.A.":147843.2,"BANCOP S.A.":300699.87,"SOLAR BANCO S.A.E.":1128604.7099999995}},"ar":{"total":5863033.910000001,"cobrado":2225494.0200000005,"vencido":381400.2,"avencer":3256139.69,"n":129,"n_venc":9,"aging":{"A Vencer":3256139.69,"180+ días":39040.2,"1-30 días":342360.0,"Cobrado":2225494.0200000005},"avg_delay":11,"avg_delay_vencido":11,"avg_delay_cobrado":11,"dso":10,"top_venc":[{"cli":"GP ALIMENTOS S.A.","s":102816.0},{"cli":"INC S.A.","s":53928.0},{"cli":"LUVIK S.A.","s":52920.0},{"cli":"COTO C.I.C.S.A.","s":52668.0},{"cli":"MARVI S.R.L.","s":42228.0}],"top_total":[{"cli":"COTO C.I.C.S.A.","s":1907136.0},{"cli":"INC S.A.","s":916776.0},{"cli":"CENCOSUD S.A.","s":362880.0},{"cli":"GLORIA SACEI","s":310079.66},{"cli":"MAYCAR S.A.","s":285399.60000000003}]},"historial":[{"f":"10/04/2026","ap":1305730.58,"fin":2338445.77,"ar":1185422.2,"net":-2458754.14},{"f":"15/04/2026","ap":1413820.7,"fin":2319450.4,"ar":2047491.4,"net":-1685779.7},{"f":"21/04/2026","ap":1442292.92,"fin":2319426.7,"ar":2128515.0,"net":-1633204.62},{"f":"23/04/2026","ap":1291346.3,"fin":2319426.7,"ar":2128515.0,"net":-1482258.0},{"f":"28/04/2026","ap":1346476.63,"fin":2319426.7,"ar":3647323.63,"net":-18579.7},{"f":"03/05/2026","ap":1346476.63,"fin":2319426.7,"ar":3647323.63,"net":-18579.7},{"f":"04/05/2026","ap":1346476.63,"fin":2319426.7,"ar":3044660.87,"net":-621242.46},{"f":"05/05/2026","ap":1425858.11,"fin":2296642.96,"ar":3101360.87,"net":-621140.2},{"f":"12/05/2026","ap":1447630.17,"fin":2292975.13,"ar":3637539.89,"net":-103065.41}]};
+let tc = 7600;
+
+// ── Tipo de cambio DNIT ──────────────────────────────────────────────────────
+async function fetchTCDNIT(){
+  const btn = document.getElementById('tc-refresh');
+  const src = document.getElementById('tc-source');
+  if(btn) btn.textContent = '↻ Cargando…';
+  if(src) src.textContent  = 'Consultando DNIT…';
+
+  // Fuentes en orden de prioridad
+  const sources = [
+    {
+      url: 'https://cdn.jsdelivr.net/gh/sistemasaguila/cotizaciones-set@main/data/latest.json',
+      parse: (data) => {
+        // Estructura: { "YYYY-MM-DD": { "usd": { "compra": X, "venta": Y } } }
+        //         o : { "date": "...", "rates": { "USD": { "compra": X, "venta": Y } } }
+        const keys = Object.keys(data);
+        // Si la clave parece una fecha (YYYY-MM-DD)
+        const dateKey = keys.find(k => /^\d{4}-\d{2}-\d{2}$/.test(k));
+        if(dateKey){
+          const r = data[dateKey];
+          const usd = r.usd || r.USD || r.Usd;
+          if(usd){
+            const venta = usd.venta || usd.sale || usd.compra_venta || usd.venta_referencial;
+            return { tc: Math.round(venta), date: dateKey, src: 'DNIT vía cotizaciones-set' };
+          }
+        }
+        // Alternativa: objeto plano con campo "date" y "rates"
+        if(data.date && data.rates){
+          const usd = data.rates.USD || data.rates.usd;
+          if(usd){
+            const venta = usd.venta || usd.sale;
+            return { tc: Math.round(venta), date: data.date, src: 'DNIT vía cotizaciones-set' };
+          }
+        }
+        return null;
+      }
+    }
+  ];
+
+  for(const source of sources){
+    try{
+      const resp = await fetch(source.url, {cache:'no-cache'});
+      if(!resp.ok) continue;
+      const data = await resp.json();
+      const result = source.parse(data);
+      if(result && result.tc > 1000){
+        tc = result.tc;
+        const inp = document.getElementById('tc-input');
+        if(inp) inp.value = tc;
+        const d = result.date ? new Date(result.date+'T00:00:00').toLocaleDateString('es-PY',{day:'2-digit',month:'short',year:'numeric'}) : '';
+        if(src) src.innerHTML = '✓ Fuente: <strong>DNIT</strong>' + (d ? ' · ' + d : '') + ' · <span style="color:#8B7355">₲ '+tc.toLocaleString('es-PY')+'</span>';
+        if(btn){ btn.textContent = '↻ DNIT'; btn.style.color='#3d7a3d'; }
+        updateAll();
+        return;
+      }
+    } catch(e){ /* silenciar y probar siguiente */ }
+  }
+
+  // Si todo falla
+  if(src) src.textContent = '⚠ No se pudo obtener el TC. Ingresalo manualmente.';
+  if(btn) btn.textContent = '↻ DNIT';
+}
+
+// Cargar automáticamente al abrir el dashboard
+window.addEventListener('DOMContentLoaded', () => { fetchTCDNIT(); });
+
+
+const fmtUSD = n => "$ "+n.toLocaleString('es-PY',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtGS = n => "₲ "+Math.round(n).toLocaleString('es-PY');
+const tick = n => Math.round(n).toLocaleString('es-PY');
+
+const AGING_AP = ["Por vencer","1-30 días","31-60 días","61-90 días","91-180 días","180+ días"];
+const AGING_COLS = ["#9B8870","#84cc16","#f59e0b","#f97316","#ef4444","#5C3A1A"];
+const BANK_COLS = ["#5C4528","#8B7355","#9B8870","#C4B08A","#D4B86A"];
+
+let cAR, cAP, cFIN, cEVOL;
+
+function updateAll(){
+ const ap = D.ap;
+ const fin = D.fin;
+ const ar = D.ar;
+
+ const ap_usd_total = ap.usd + ap.gs/tc;
+ const fin_usd_total = fin.usd + fin.gs/tc;
+ const ar_pendiente = ar.vencido + ar.avencer;
+ const net_pagar = ap_usd_total + fin_usd_total;
+ const net_pos = ar_pendiente - net_pagar;
+ const total_cons = ar_pendiente - net_pagar;
+
+ // Cobertura: qué % de los pagos están cubiertos por cobros
+ const cobertura = net_pagar > 0 ? (ar_pendiente / net_pagar * 100) : 0;
+ const consEl = document.getElementById('total-consolidado');
+ consEl.textContent = cobertura.toLocaleString('es-PY',{minimumFractionDigits:1,maximumFractionDigits:1}) + '%';
+ consEl.style.color = cobertura >= 100 ? '#3d7a3d' : cobertura >= 80 ? '#b45309' : '#b91c1c';
+ const subEl = document.getElementById('cobertura-sub');
+ if(subEl) subEl.textContent = cobertura >= 100 ? 'Pagos cubiertos ✓' : cobertura >= 80 ? 'Cobertura parcial' : 'Cobertura insuficiente';
+
+ // AR card
+ document.getElementById('ar-total').textContent = fmtUSD(ar.total);
+ document.getElementById('ar-sub').textContent = ar.n+' facturas · TC referencia: ₲'+tc.toLocaleString('es-PY');
+ document.getElementById('ar-alert').innerHTML = fmtUSD(ar.vencido)+' vencido · '+ar.n_venc+' fact.';
+
+ // AP card
+ document.getElementById('ap-total').textContent = fmtUSD(ap_usd_total);
+ document.getElementById('ap-sub').textContent = ap.n+' facturas · GS '+fmtGS(ap.gs)+' + USD '+fmtUSD(ap.usd).replace('$ ','');
+ document.getElementById('ap-alert').innerHTML = fmtUSD(ap.venc_usd+ap.venc_gs/tc)+' vencido · '+ap.n_venc+' fact.';
+
+ // FIN card
+ document.getElementById('fin-total').textContent = fmtUSD(fin_usd_total);
+ document.getElementById('fin-sub').textContent = fin.n+' cuotas bancarias';
+ document.getElementById('fin-alert').innerHTML = ' '+fmtUSD(fin.venc_usd)+' vencido · '+fin.n_venc+' cuotas';
+
+ // NET position
+ document.getElementById('net-cobrar').textContent = fmtUSD(ar_pendiente);
+ document.getElementById('net-cobrar-s').textContent = 'Vencido + A Vencer';
+ document.getElementById('net-pagar').textContent = fmtUSD(net_pagar);
+ document.getElementById('net-pagar-s').textContent = 'AP + Financiamiento';
+ const posEl = document.getElementById('net-pos');
+ posEl.textContent = fmtUSD(net_pos);
+ posEl.style.color = net_pos >= 0 ? '#3d7a3d' : '#b91c1c';
+ document.getElementById('net-pos-s').textContent = net_pos >= 0 ? 'Posición favorable' : 'Déficit de caja';
+
+ // AR donut
+ const arData = [
+ {l:'Cobrado', v:ar.cobrado, c:'#9B8870'},
+ {l:'A Vencer', v:ar.avencer, c:'#8B7355'},
+ {l:'Vencido', v:ar.vencido, c:'#dc2626'}
+ ];
+ if(cAR) cAR.destroy();
+ cAR = new Chart(document.getElementById('c-ar-donut'),{type:'doughnut',
+ data:{labels:arData.map(e=>e.l),datasets:[{data:arData.map(e=>e.v),backgroundColor:arData.map(e=>e.c),borderWidth:2,borderColor:'#fff',hoverOffset:5}]},
+ options:{animation:{duration:300},cutout:'65%',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+ctx.label+': '+fmtUSD(ctx.raw)}}},onHover:(e,els)=>{e.native.target.style.cursor=els.length?'pointer':'default'},onClick:(e,els,ch)=>{if(!els.length)return;const lbl=arData[els[0].index].l;let rows=[];if(lbl==='Vencido'){rows=(D.ar.top_venc||[]).map(r=>({label:r.cli,val:'$ '+Math.round(r.s).toLocaleString('es-PY')}));}else{rows=(D.ar.top_total||[]).map(r=>({label:r.cli,val:'$ '+Math.round(r.s).toLocaleString('es-PY')}));}const sub=lbl==='Vencido'?'Top clientes vencidos':'Top 5 clientes por saldo total';showDetailModal('AR · '+lbl,sub,rows);}}
+ });
+ document.getElementById('ar-donut-leg').innerHTML = arData.map(e=>`
+ <div style="display:flex;align-items:center;gap:8px">
+ <span style="width:10px;height:10px;border-radius:50%;background:${e.c};display:inline-block;flex-shrink:0"></span>
+ <div><span style="font-weight:600;color:#3D3020">${e.l}</span>
+ <span style="color:#A09080;font-size:10.5px;margin-left:6px">${fmtUSD(e.v)}</span></div>
+ </div>`).join('');
+
+ // AP aging bar
+ const apAgingUSD = AGING_AP.map(k => (D.ap.aging_usd[k]||0) + (D.ap.aging_gs[k]||0)/tc);
+ if(cAP) cAP.destroy();
+ cAP = new Chart(document.getElementById('c-ap-aging'),{type:'bar',
+ data:{labels:AGING_AP.map(l=>l.replace(' días',' d.')),
+ datasets:[{label:'USD equiv.',data:apAgingUSD,backgroundColor:AGING_COLS,borderRadius:5}]},
+ options:{animation:{duration:300},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+fmtUSD(ctx.raw)}}},onHover:(e,els)=>{e.native.target.style.cursor=els.length?'pointer':'default'},onClick:(e,els,ch)=>{if(!els.length)return;const bucket=AGING_AP[els[0].index];const detail=(D.ap.aging_detail&&D.ap.aging_detail[bucket])||[];const rows=detail.map(r=>({label:r.p,val:'$ '+Math.round(r.m).toLocaleString('es-PY')}));const tot=(D.ap.aging_usd[bucket]||0)+(D.ap.aging_gs[bucket]||0)/tc;showDetailModal('AP · '+bucket.replace(' días',' d.'),rows.length+' proveedores · $ '+Math.round(tot).toLocaleString('es-PY'),rows);},
+ scales:{x:{ticks:{font:{size:9},color:'#7A6A58'},grid:{color:'#F5F0EA'}},
+ y:{ticks:{font:{size:9},color:'#7A6A58',callback:v=>tick(v)},grid:{color:'#F5F0EA'}}}}
+ });
+
+ // FIN pie
+ const bancos = Object.entries(D.fin.bancos).map(([l,v],i)=>{return{l,v,c:BANK_COLS[i%BANK_COLS.length]}});
+ const bTot = bancos.reduce((s,e)=>s+e.v,0);
+ if(cFIN) cFIN.destroy();
+ cFIN = new Chart(document.getElementById('c-fin-pie'),{type:'pie',
+ data:{labels:bancos.map(e=>e.l),datasets:[{data:bancos.map(e=>e.v),backgroundColor:bancos.map(e=>e.c),borderWidth:2,borderColor:'#fff',hoverOffset:6}]},
+ options:{animation:{duration:300},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+ctx.label+': '+fmtUSD(ctx.raw)+' ('+Math.round(ctx.raw/bTot*100)+'%)'}}},onHover:(e,els)=>{e.native.target.style.cursor=els.length?'pointer':'default'},onClick:(e,els,ch)=>{if(!els.length)return;const bname=bancos[els[0].index]?bancos[els[0].index].l:'';const rows=(D.fin.fin_detail||[]).map(r=>({label:r.p,val:'$ '+Math.round(r.m).toLocaleString('es-PY')}));showDetailModal('Deuda Financiera',rows.length+' bancos'+( bname?' · '+bname+' seleccionado':''),rows);}}
+ });
+ document.getElementById('fin-pie-leg').innerHTML = bancos.map(e=>`
+ <div style="display:flex;align-items:center;gap:8px">
+ <span style="width:10px;height:10px;border-radius:50%;background:${e.c};display:inline-block;flex-shrink:0"></span>
+ <div><span style="font-weight:600;color:#3D3020;font-size:11px">${e.l.length>30?e.l.slice(0,29)+'…':e.l}</span>
+ <span style="color:#A09080;font-size:10px;margin-left:4px">${Math.round(e.v/bTot*100)}%</span></div>
+ </div>`).join('');
+
+ // Alert rows
+ document.getElementById('ar-alerts').innerHTML = D.ar.top_venc.map((r,i)=>`
+ <div class="alert-item">
+ <span style="color:#A09080;font-size:10.5px;margin-right:8px;font-weight:700">${i+1}</span>
+ <span class="cli">${r.cli}</span>
+ <span class="amt" style="color:#dc2626">${fmtUSD(r.s)}</span>
+ </div>`).join('') || '<div style="color:#A09080;font-size:12px;padding:8px">Sin saldo vencido</div>';
+
+ document.getElementById('ar-top-alerts').innerHTML = D.ar.top_total.map((r,i)=>`
+ <div class="alert-item">
+ <span style="color:#A09080;font-size:10.5px;margin-right:8px;font-weight:700">${i+1}</span>
+ <span class="cli">${r.cli}</span>
+ <span class="amt" style="color:#5C4528">${fmtUSD(r.s)}</span>
+ </div>`).join('');
+
+ // ── DPO / DSO ────────────────────────────────────────────
+ const dpo = D.ap.dpo || 0;
+ const dso = D.ar.dso || 0;
+ document.getElementById('dpo-val').textContent = dpo > 0 ? dpo + ' días' : '—';
+ document.getElementById('dso-val').textContent = dso > 0 ? dso + ' días' : '—';
+ // Color: más días = más rojo
+ document.getElementById('dpo-val').style.color = dpo > 90 ? '#dc2626' : dpo > 60 ? '#f97316' : dpo > 30 ? '#f59e0b' : '#3D2A18';
+ document.getElementById('dso-val').style.color = dso > 60 ? '#dc2626' : dso > 30 ? '#f97316' : dso > 15 ? '#f59e0b' : '#3D2A18';
+
+ // ── EVOLUCIÓN DE DEUDA ───────────────────────────────────
+ renderEvolucion();
+}
+
+function renderEvolucion() {
+ const hist = D.historial || [];
+ const canvas = document.getElementById('c-evol');
+ const emptyMsg = document.getElementById('evol-empty');
+
+ if (hist.length < 2) {
+  canvas.style.display = 'none';
+  emptyMsg.style.display = 'block';
+  document.getElementById('evol-leg').innerHTML = '';
+  return;
+ }
+ canvas.style.display = 'block';
+ emptyMsg.style.display = 'none';
+
+ const labels = hist.map(h => h.f);
+ const datasets = [
+  {
+   label: 'Cuentas a Pagar',
+   data: hist.map(h => h.ap),
+   borderColor: '#8B7355', backgroundColor: 'rgba(139,115,85,.08)',
+   tension: 0, fill: false, pointRadius: 3, pointHoverRadius: 5,
+   borderWidth: 2
+  },
+  {
+   label: 'Deuda Bancaria',
+   data: hist.map(h => h.fin),
+   borderColor: '#5C4528', backgroundColor: 'rgba(92,69,40,.08)',
+   tension: 0, fill: false, pointRadius: 3, pointHoverRadius: 5,
+   borderWidth: 2
+  },
+  {
+   label: 'Por Cobrar (AR)',
+   data: hist.map(h => h.ar),
+   borderColor: '#D4B86A', backgroundColor: 'rgba(212,184,106,.08)',
+   tension: 0, fill: false, pointRadius: 3, pointHoverRadius: 5,
+   borderWidth: 2
+  },
+  {
+   label: 'Posición Neta',
+   data: hist.map(h => h.net),
+   borderColor: '#5a8a5a', backgroundColor: 'rgba(90,138,90,.08)',
+   tension: 0, fill: false, pointRadius: 3, pointHoverRadius: 5,
+   borderWidth: 2, borderDash: [5,3]
+  }
+ ];
+
+ if (cEVOL) cEVOL.destroy();
+ cEVOL = new Chart(canvas, {
+  type: 'line',
+  data: { labels, datasets },
+  options: {
+   animation: { duration: 400 },
+   responsive: true,
+   interaction: { mode: 'index', intersect: false },
+   plugins: {
+    legend: { display: false },
+    tooltip: {
+     callbacks: {
+      label: ctx => ' ' + ctx.dataset.label + ': ' + fmtUSD(ctx.raw)
+     }
+    }
+   },
+   scales: {
+    x: { ticks: { font: { size: 10 }, color: '#7A6A58' }, grid: { color: '#F5F0EA' } },
+    y: {
+     ticks: { font: { size: 10 }, color: '#7A6A58', callback: v => '$ ' + Math.round(v/1000) + 'k' },
+     grid: { color: '#F5F0EA' }
+    }
+   }
+  }
+ });
+
+ // Leyenda manual
+ const leg = [
+  { c: '#8B7355', l: 'Cuentas a Pagar' },
+  { c: '#5C4528', l: 'Deuda Bancaria' },
+  { c: '#D4B86A', l: 'Por Cobrar (AR)' },
+  { c: '#5a8a5a', l: 'Posición Neta' }
+ ];
+
+ document.getElementById('evol-leg').innerHTML = leg.map(e =>
+  `<div style="display:flex;align-items:center;gap:8px;font-size:12px">
+   <span style="width:12px;height:12px;border-radius:2px;background:${e.c};display:inline-block;flex-shrink:0"></span>
+   ${e.l}
+  </div>`
+ ).join('');
+}
+
+function showDetailModal(title, sub, rows){
+  const overlay=document.getElementById('modal-overlay');
+  document.getElementById('modal-title').textContent=title;
+  document.getElementById('modal-sub').textContent=sub;
+  document.getElementById('modal-body').innerHTML=rows.length
+    ?'<table style="width:100%;border-collapse:collapse;font-size:12px">'
+     +'<thead><tr><th style="text-align:left;padding:8px 4px;color:#A09080;font-weight:600;border-bottom:1px solid #E5DDD0">Proveedor / Cliente</th>'
+     +'<th style="text-align:right;padding:8px 4px;color:#A09080;font-weight:600;border-bottom:1px solid #E5DDD0">Monto USD</th></tr></thead>'
+     +'<tbody>'+rows.map(r=>'<tr><td style="padding:7px 4px;color:#3D2A18;border-bottom:1px solid #F5F0EA;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+r.label+'</td>'
+     +'<td style="padding:7px 4px;text-align:right;font-weight:700;color:#5C4528;border-bottom:1px solid #F5F0EA">'+r.val+'</td></tr>').join('')
+     +'</tbody></table>'
+    :'<div style="color:#A09080;text-align:center;padding:24px">Sin datos</div>';
+  document.getElementById('modal-footer').innerHTML='<button onclick="closeDetailModal()" style="padding:7px 20px;background:#5C4528;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600">Cerrar</button>';
+  overlay.style.display='flex';
+}
+function closeDetailModal(){document.getElementById('modal-overlay').style.display='none';}
+
+
+updateAll();
+
+function toggleNav(){
+  const m=document.getElementById('nav-mobile');
+  m.classList.toggle('open');
+}
+// Cerrar menú al hacer clic en un link
+document.querySelectorAll('.nav-mobile a').forEach(a=>{
+  a.addEventListener('click',()=>document.getElementById('nav-mobile').classList.remove('open'));
+});
+</script>
+
+<div id="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center" onclick="if(event.target===this)closeDetailModal()">
+ <div style="background:#fff;border-radius:14px;width:min(540px,92vw);max-height:80vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,.18)">
+  <div style="padding:18px 22px 12px;border-bottom:1px solid #F0EBE3">
+   <div id="modal-title" style="font-size:15px;font-weight:700;color:#3D2A18"></div>
+   <div id="modal-sub" style="font-size:11px;color:#A09080;margin-top:3px"></div>
+  </div>
+  <div id="modal-body" style="padding:0 22px;overflow-y:auto;flex:1"></div>
+  <div id="modal-footer" style="padding:12px 22px;border-top:1px solid #F0EBE3;text-align:right"></div>
+ </div>
+</div>
+</body>
+</html>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
